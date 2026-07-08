@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preflight Checklist — Assembly Traveler</title>
+<style>
+  :root{
+    --paper:#F4F5F2;
+    --panel:#FFFFFF;
+    --ink:#1B2530;
+    --ink-soft:#5A6672;
+    --line:#D9DDD8;
+    --line-strong:#B9C0BB;
+    --amber:#E39A17;
+    --amber-deep:#9A6A05;
+    --amber-wash:#FBF1DC;
+    --green:#2E7D4F;
+    --green-wash:#E9F3EC;
+    --steel:#3D5A73;
+    --mono:ui-monospace,'SF Mono','Cascadia Mono','Consolas','Liberation Mono',monospace;
+    --sans:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *{transition:none!important;animation:none!important} }
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45}
+
+  /* ---------- top bar ---------- */
+  .topbar{position:sticky;top:0;z-index:50;background:var(--ink);color:#F2F4F1;border-bottom:4px solid var(--amber)}
+  .topbar-inner{max-width:1180px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;flex-direction:column;line-height:1.05}
+  .brand .kicker{font-family:var(--mono);font-size:10px;letter-spacing:.22em;color:var(--amber);text-transform:uppercase}
+  .brand .name{font-weight:800;font-size:17px;letter-spacing:.04em;text-transform:uppercase}
+  .picker{flex:1;min-width:220px;max-width:460px}
+  .picker select{width:100%;padding:9px 12px;border-radius:6px;border:1px solid #46525E;background:#243040;color:#F2F4F1;font-family:var(--mono);font-size:13px}
+  .picker select:focus{outline:2px solid var(--amber);outline-offset:1px}
+  .top-actions{display:flex;gap:8px;align-items:center;margin-left:auto}
+  .btn{font:inherit;font-weight:600;font-size:13px;padding:8px 14px;border-radius:6px;border:1px solid transparent;cursor:pointer}
+  .btn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+  .btn-amber{background:var(--amber);color:#241A02}
+  .btn-amber:hover{background:#F0AA2B}
+  .btn-ghost{background:transparent;color:#DDE2DE;border-color:#4A5763}
+  .btn-ghost:hover{background:#2A3541}
+  .save-note{font-family:var(--mono);font-size:11px;color:#9AA6B0;min-width:64px;text-align:right}
+
+  /* ---------- progress strip ---------- */
+  .progress-strip{background:#243040;height:26px;position:relative}
+  .progress-fill{position:absolute;inset:0;width:0%;background:linear-gradient(90deg,var(--amber-deep),var(--amber));transition:width .35s ease}
+  .progress-label{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 20px;height:26px;display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:#F2F4F1}
+
+  /* ---------- layout ---------- */
+  .wrap{max-width:1180px;margin:0 auto;padding:22px 20px 80px;display:grid;grid-template-columns:210px 1fr;gap:22px;align-items:start}
+  @media(max-width:860px){.wrap{grid-template-columns:1fr}}
+
+  /* ---------- spine ---------- */
+  .spine{position:sticky;top:120px;border-left:3px solid var(--line-strong);padding-left:0}
+  .spine h2{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px 16px}
+  .spine ol{list-style:none}
+  .spine button{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;padding:8px 8px 8px 16px;cursor:pointer;font:inherit;text-align:left;color:var(--ink);border-radius:0 6px 6px 0;position:relative}
+  .spine button:hover{background:#ECEEE9}
+  .spine button:focus-visible{outline:2px solid var(--amber)}
+  .ring{width:20px;height:20px;border-radius:50%;border:2.5px solid var(--line-strong);background:var(--panel);flex:none;display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;position:relative;left:-27px;margin-right:-27px;transition:all .2s}
+  .spine li.done .ring{border-color:var(--green);background:var(--green);color:#fff}
+  .spine li.partial .ring{border-color:var(--amber)}
+  .spine .lbl{display:flex;flex-direction:column;line-height:1.15}
+  .spine .lbl b{font-size:13px;font-weight:700}
+  .spine .lbl span{font-family:var(--mono);font-size:10px;color:var(--ink-soft)}
+  @media(max-width:860px){
+    .spine{position:static;border-left:none;border-top:3px solid var(--line-strong);padding-top:10px}
+    .spine ol{display:flex;flex-wrap:wrap;gap:4px}
+    .spine button{padding:6px 10px}
+    .ring{left:0;margin-right:0}
+    .spine .lbl span{display:none}
+  }
+
+  /* ---------- cards ---------- */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 1px 2px rgba(27,37,48,.06);margin-bottom:20px;overflow:hidden}
+
+  /* header / traveler card */
+  .traveler-head{padding:18px 22px 6px;border-bottom:1px dashed var(--line-strong)}
+  .traveler-head .doc-kicker{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber-deep)}
+  .traveler-head h1{font-size:24px;font-weight:800;letter-spacing:.01em;margin:2px 0 4px}
+  .modelrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0 14px}
+  .model{font-family:var(--mono);font-size:15px;font-weight:700;background:var(--ink);color:#F6E9CF;padding:6px 12px;border-radius:5px;letter-spacing:.03em}
+  .chipset{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .chipset .cap{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft)}
+  .chip{font-family:var(--mono);font-size:12.5px;font-weight:700;padding:5px 13px;border-radius:999px;border:1.5px solid var(--line-strong);background:var(--panel);color:var(--ink-soft);cursor:pointer}
+  .chip:hover{border-color:var(--amber)}
+  .chip:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+  .chip.on{border-color:var(--amber-deep);background:var(--amber-wash);color:var(--amber-deep);box-shadow:inset 0 0 0 1px var(--amber-deep)}
+  .chip.on-pass{border-color:var(--green);background:var(--green-wash);color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+  .chip.on-fail{border-color:#B23A3A;background:#F9ECEC;color:#B23A3A;box-shadow:inset 0 0 0 1px #B23A3A}
+  .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px 16px;padding:16px 22px 20px}
+  .field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:4px}
+  .field input{width:100%;padding:8px 10px;border:none;border-bottom:1.5px solid var(--line-strong);background:transparent;font:inherit;font-size:14px;color:var(--ink)}
+  .field input:focus{outline:none;border-bottom-color:var(--amber-deep);background:var(--amber-wash)}
+  .instr{padding:10px 22px;background:#FBFBF9;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-soft)}
+
+  /* station cards */
+  .station{scroll-margin-top:130px}
+  .station-head{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--line);background:linear-gradient(#FDFDFC,#F7F8F5)}
+  .st-num{font-family:var(--mono);font-weight:700;font-size:13px;background:var(--panel);border:2px solid var(--ink);border-radius:6px;padding:5px 10px;letter-spacing:.06em}
+  .station.complete .st-num{background:var(--green);border-color:var(--green);color:#fff}
+  .station-head h3{font-size:16px;font-weight:800;letter-spacing:.02em;flex:1}
+  .st-count{font-family:var(--mono);font-size:11.5px;color:var(--ink-soft)}
+  .station.complete{border-color:var(--green)}
+  .st-cols{display:grid;grid-template-columns:1.4fr 1fr;gap:0}
+  @media(max-width:700px){.st-cols{grid-template-columns:1fr}}
+  .st-col{padding:14px 20px 18px}
+  .st-col + .st-col{border-left:1px dashed var(--line)}
+  @media(max-width:700px){.st-col + .st-col{border-left:none;border-top:1px dashed var(--line)}}
+  .st-col h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--steel);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .st-col h4::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  .check{display:flex;gap:10px;align-items:flex-start;padding:7px 6px;border-radius:6px;cursor:pointer}
+  .check:hover{background:#F3F4F0}
+  .check input{width:18px;height:18px;margin-top:1px;flex:none;accent-color:var(--green);cursor:pointer}
+  .check .txt{font-size:14px}
+  .check.checked .txt{color:var(--ink-soft)}
+  .pn{font-family:var(--mono);font-size:12px;font-weight:700;background:#EDF0F3;border:1px solid #D5DBе1;border:1px solid #D5DBE1;color:var(--steel);border-radius:4px;padding:1px 6px;white-space:nowrap}
+  .loc{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--amber-deep);background:var(--amber-wash);border-radius:4px;padding:1px 6px;white-space:nowrap}
+
+  .torque-item .txt{font-weight:600}
+  .torque-tag{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;background:var(--amber);color:#241A02;border-radius:3px;padding:2px 6px;margin-right:8px;vertical-align:1px}
+
+  .st-foot{display:flex;align-items:center;gap:14px;padding:12px 20px;border-top:1px solid var(--line);background:#FBFBF9;flex-wrap:wrap}
+  .st-foot .initials{display:flex;align-items:center;gap:8px}
+  .st-foot .initials label{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft)}
+  .st-foot .initials input{width:90px;padding:7px 10px;border:1.5px solid var(--line-strong);border-radius:6px;font-family:var(--mono);font-weight:700;font-size:14px;text-transform:uppercase;text-align:center}
+  .st-foot .initials input:focus{outline:none;border-color:var(--amber-deep);background:var(--amber-wash)}
+  .st-status{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-soft)}
+  .station.complete .st-status{color:var(--green);font-weight:700}
+  .stamp{display:none;font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.18em;color:var(--green);border:2.5px solid var(--green);border-radius:6px;padding:4px 10px;transform:rotate(-4deg)}
+  .station.complete .stamp{display:inline-block}
+
+  .signoff{padding:18px 22px}
+  .signoff h3{font-size:15px;font-weight:800;margin-bottom:2px}
+  .signoff p{font-size:12.5px;color:var(--ink-soft);margin-bottom:12px}
+
+  /* ---------- Google Form modal ---------- */
+  .modal-back{position:fixed;inset:0;background:rgba(27,37,48,.55);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+  .modal-back.open{display:flex}
+  .modal{background:var(--panel);border-radius:12px;max-width:640px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.3);overflow:hidden}
+  .modal-head{background:var(--ink);color:#F2F4F1;padding:14px 20px;display:flex;align-items:center;gap:10px}
+  .modal-head h3{font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;flex:1}
+  .modal-head .kick{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--amber)}
+  .modal-close{background:none;border:none;color:#DDE2DE;font-size:20px;cursor:pointer;line-height:1;padding:4px 8px;border-radius:6px}
+  .modal-close:hover{background:#2A3541}
+  .modal-body{padding:18px 20px;font-size:13.5px}
+  .modal-body ol{margin:10px 0 14px 20px;display:grid;gap:8px}
+  .modal-body code, .ph-list code{font-family:var(--mono);font-size:12px;background:#EDF0F3;border:1px solid #D5DBE1;color:var(--steel);border-radius:4px;padding:1px 6px}
+  .ph-list{background:#FBFBF9;border:1px dashed var(--line-strong);border-radius:8px;padding:10px 12px;margin:10px 0;font-size:12.5px;line-height:2}
+  .modal-body textarea{width:100%;min-height:74px;padding:10px 12px;border:1.5px solid var(--line-strong);border-radius:8px;font-family:var(--mono);font-size:12px;resize:vertical}
+  .modal-body textarea:focus{outline:none;border-color:var(--amber-deep);background:var(--amber-wash)}
+  .gform-status{font-family:var(--mono);font-size:12px;margin-top:8px;min-height:18px}
+  .gform-status.ok{color:var(--green);font-weight:700}
+  .gform-status.err{color:#B23A3A;font-weight:700}
+  .modal-foot{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end;background:#FBFBF9}
+  .btn-dark{background:var(--ink);color:#F2F4F1}
+  .btn-dark:hover{background:#2A3541}
+  .btn-outline{background:var(--panel);color:var(--ink);border-color:var(--line-strong)}
+  .btn-outline:hover{border-color:var(--ink)}
+
+  /* ---------- print ---------- */
+  @media print{
+    .topbar,.progress-strip,.spine,.no-print{display:none!important}
+    body{background:#fff;font-size:12px}
+    .wrap{display:block;max-width:none;padding:0}
+    .card{box-shadow:none;break-inside:avoid;margin-bottom:12px}
+    .check input{accent-color:#000}
+    .field input,.st-foot .initials input{border-color:#000}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="kicker">Assembly Traveler</span>
+      <span class="name">Preflight Checklist</span>
+    </div>
+    <div class="picker">
+      <label class="sr-only" for="productSel" style="position:absolute;left:-9999px">Select product</label>
+      <select id="productSel" aria-label="Select product checklist"></select>
+    </div>
+    <div class="top-actions">
+      <span class="save-note" id="saveNote"></span>
+      <button class="btn btn-ghost" id="resetBtn" type="button">Reset form</button>
+      <button class="btn btn-ghost" id="gformSetupBtn" type="button" title="Google Form setup">⚙</button>
+      <button class="btn btn-ghost" id="gformSendBtn" type="button">Send to Google Form</button>
+      <button class="btn btn-amber" id="printBtn" type="button">Print record</button>
+    </div>
+  </div>
+  <div class="progress-strip">
+    <div class="progress-fill" id="progFill"></div>
+    <div class="progress-label"><span id="progText">0 of 0 items checked</span><span id="progPct">0%</span></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="spine" aria-label="Stations">
+    <h2>Stations</h2>
+    <ol id="spineList"></ol>
+  </nav>
+  <main id="main"></main>
+</div>
+
+<div class="modal-back" id="gformModal" role="dialog" aria-modal="true" aria-labelledby="gformTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <div style="flex:1">
+        <div class="kick">One-time setup</div>
+        <h3 id="gformTitle">Connect a Google Form</h3>
+      </div>
+      <button class="modal-close" type="button" data-close>&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Completed checklists can be sent straight into a Google Form (and its response spreadsheet). Set it up once and every operator using this page can submit records.</p>
+      <ol>
+        <li>Create a Google Form. Add one <b>Short answer</b> question for each field below — use the exact code as the question title (the last one, <code>RECORD</code>, should be a <b>Paragraph</b> question).</li>
+        <li>In the form editor, open the <b>⋮ menu → "Get pre-filled link."</b></li>
+        <li>In the pre-filled view, type each question's code into its own answer box (type <code>PRODUCT</code> into the Product question, and so on), then click <b>Get link → Copy link</b>.</li>
+        <li>Paste that link here:</li>
+      </ol>
+      <div class="ph-list">
+        <code>PRODUCT</code> <code>MODEL</code> <code>VARIANT</code> <code>TEAM</code> <code>STARTBY</code> <code>STARTDATE</code> <code>STARTTIME</code> <code>ENDTIME</code> <code>ASMDATE</code> <code>COMPLETEDBY</code> <code>COMPDATE</code> <code>LINE</code> <code>INITIALS</code> <code>FAI</code> <code>LAI</code> <code>PROGRESS</code> <code>RECORD</code>
+        <div style="line-height:1.4;color:var(--ink-soft);margin-top:6px">You can skip fields you don't need — only the codes you fill in will be mapped.</div>
+      </div>
+      <textarea id="gformUrl" placeholder="https://docs.google.com/forms/d/e/…/viewform?usp=pp_url&entry.123=PRODUCT&entry.456=MODEL…" spellcheck="false"></textarea>
+      <div class="gform-status" id="gformStatus"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" type="button" id="gformClear">Remove connection</button>
+      <button class="btn btn-outline" type="button" data-close>Cancel</button>
+      <button class="btn btn-dark" type="button" id="gformSave">Save connection</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = [{"title": "Carina Event Manager", "model": "WL-EM-CAR", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["Screw, Thread Forming 6-32-3/3 T-15 Drill Bit (3605-8-1),", "Location: Shelf 2-A", "Faceplate", ",(4701-92-2),Location: SHELF 5-E", "Tape, Foam 0.25\u201d", "(3922-1-1),Location: SHELF 9-E", "CCA, Factory Tested & Programmed, Voyd", "(6005-19-3), Location: LANE 4", "CCA, Factory Assembled, PM Module \u201cGiggle\u201d", "(6005-21-1), Location: LANE 4", "1-u Extrusion 4.95 in 4.97 max (4701-84-1), Location: LANE 2", "Faceplate, 1-u Steve, Bailey, (4701-174-1), Location: SHELF 5-C"], "tools": ["Table top Foam", "Medium/Long 3.5 or 6inch T-15 Bit", "Blue Switch Heavy Torque Driver", "Bin labeled with the correct part number. (Part number and bin number should match)", "Tweezers"], "torque": ["Torque setting at 2-3 on HTD- T-15 (Screw 3605-8-1)"]}, {"name": "Station 2 Testing", "materials": ["Label, 3x1\u201d Plastic thermal print, ThermalMark Versa2 series (4502-6-1), Location: SHELF 11-E", "Label, 4x2\u201d, Plastic Thermal print, ThermalMark Versa2 series (4502-3-1), Location: SHELF 11-E"], "tools": ["PoE Cable"], "torque": []}, {"name": "Station 3 Part Kit & Packaging", "materials": ["Bag, Plastic, 2 mil, 2x3\u201d resealable (4303-1-1), Location: SHELF 4-B", "Plug screw terminal 2 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series (3102-29-1), Location: SHELF 1-F", "Plug screw terminal 6 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series", "(3102-28-1), Location: SHELF 1-F", "Box, Mailer, plain white, 6x4.75x2 (4301-3-1), Location: LANE 1"], "tools": [], "torque": []}], "category": "Carina PBX & Event Manager", "variants": []}, {"title": "Carina Event Manager Lite", "model": "WL-EM-CAR-Lite", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Screw, Thread Forming 6-32-3/3 T-15 Drill Bit (3605-8-1), Location: Shelf 2-A", "Faceplate", ",(4701-92-2), Location: SHELF 5-E", "Tape, Foam 0.25\u201d", "(3922-1-1), Location: SHELF 9-E", "CCA, Factory Tested & Programmed, Voyd", "(6005-19-3), Location: LANE 4", "CCA, Factory Assembled, PM Module \u201cGiggle\u201d", "(6005-21-1), Location: LANE 4", "1-u Extrusion 4.95 in 4.97 max (4701-84-1), Location: LANE 2", "Faceplate, 1-u Steve, Bailey, (4701-176-1), Location: SHELF 5-C"], "tools": ["Table top Foam", "Medium/Long 3.5 or 6inch T-15 Bit", "Blue Switch Heavy Torque Driver", "Bin labeled with the correct part number. (Part number and bin number should match)", "Tweezers"], "torque": ["Torque setting at 2-3 on HTD- T-15 (Screw 3605-8-1)"]}, {"name": "Station 2 Testing", "materials": ["Label, 3x1\u201d Plastic thermal print, ThermalMark Versa2 series (4502-6-1), Location: SHELF 11-E", "Label, 4x2\u201d, Plastic Thermal print, ThermalMark Versa2 series (4502-3-001), Location: SHELF 11-E"], "tools": ["PoE Cable"], "torque": []}, {"name": "Station 3 Part Kit & Packaging", "materials": ["Bag, Plastic, 2 mil, 2x3\u201d resealable (4303-1-1), Location: SHELF 4-B", "Plug screw terminal 2 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series (3102-29-1), Location: SHELF 1-F", "Plug screw terminal 6 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series", "(3102-28-1), Location: SHELF 1-F", "Box, Mailer, plain white, 6x4.75x2 (4301-3-1), Location: LANE 1"], "tools": [], "torque": []}], "category": "Carina PBX & Event Manager", "variants": []}, {"title": "Carina PBX Lite", "model": "WL-PBX-CAR-LITE", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1 Parts", "materials": ["Screw, Thread Forming 6-32-3/3 T-15 Drill Bit (3605-8-1), Location: Shelf 2-A", "Faceplate (4701-92-2), Location: SHELF 5-E", "Tape, Foam 0.25\u201d", "(3922-1-1), Location: SHELF 9-E", "CCA, Factory Tested & Programmed, Carina", "(6005-4-5), Location: LANE 4", "CCA, Factory Assembled, PM Module \u201cSimper\u201d", "(6005-27-1), Location: LANE 4", "1-u Extrusion 4.95 in 4.97 max (4701-84-1), Location: LANE 2", "Faceplate, 1-u Steve, Bailey, (4701-183-1), Location: SHELF 5-C"], "tools": ["Table top Foam", "Medium/Long 3.5 or 6inch T-15 Bit", "Blue Switch Heavy Torque Driver", "Bin labeled with the correct part number. (Part number and bin number should match)", "Tweezers"], "torque": ["Torque setting at 2-3 on HTD- T-15 (Screw 3605-8-1)"]}, {"name": "Station 2 Testing", "materials": ["Label, 3x1\u201d Plastic thermal print, ThermalMark Versa2 series (4502-6-1), Location: SHELF 11-E", "Label, 4x2\u201d, Plastic Thermal print, ThermalMark Versa2 series (4502-3-001), Location: SHELF 11-E"], "tools": ["PoE Cable"], "torque": []}, {"name": "Station 3 Part Kit & Packaging", "materials": ["Bag, Plastic, 2 mil, 2x3\u201d resealable (4303-1-1), Location: SHELF 4-B", "Plug screw terminal 2 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series (3102-29-1), Location: SHELF 1-F", "Plug screw terminal 6 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series", "(3102-28-1), Location: SHELF 1-F", "Box, Mailer, plain white, 6x4.75x2 (4301-3-1), Location: LANE 1"], "tools": [], "torque": []}], "category": "Carina PBX & Event Manager", "variants": []}, {"title": "Wahsega Carina PBX", "model": "WL-PBX-CAR", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Screw, Thread Forming 6-32-3/3 T-15 Drill Bit (3605-8-1),Location: Shelf 2-A", "Faceplate", ",(4701-92-2),Location: SHELF 5-E", "Square FoamTape, Foam 0.25\u201d", "(3922-1-1), Location: SHELF 9-E", "CCA, Factory Tested & Programmed, Voyd", "(6005-19-3), Location: LANE 4", "CCA, Factory Assembled, PM Module \u201cSimper\u201d", "(6005-27-1), Location: LANE 4", "1-u Extrusion 4.95 in 4.97 max (4701-84-1), Location: LANE 2", "Faceplate, 1-u Steve, Bailey, (4701-182-1), Location: SHELF 5-C"], "tools": ["Table top Foam", "Medium/Long 3.5 or 6inch T-15 Bit", "Blue Switch Heavy Torque Driver", "Bin labeled with the correct part number. (Part number and bin number should match)", "Tweezers"], "torque": ["Torque setting at 2-3 on HTD- T-15 (Screw 3605-8-1)"]}, {"name": "Station 2 Testing", "materials": ["Label, 3x1\u201d Plastic thermal print, ThermalMark Versa2 series (4502-6-1),Location: SHELF 11-E", "Label, 4x2\u201d, Plastic Thermal print, ThermalMark Versa2 series (4502-3-001), Location: SHELF 11-E"], "tools": ["PoE Cable"], "torque": []}, {"name": "Station 3 Part Kit & Packaging", "materials": ["Bag, Plastic, 2 mil, 2x3\u201d resealable (4303-1-1), Location: SHELF 4-B", "Plug screw terminal 2 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series (3102-29-1),Location: SHELF 1-F", "Plug screw terminal 6 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series", "(3102-28-1),Location: SHELF 1-F", "Box, Mailer, plain white, 6x4.75x2 (4301-3-1),Location: LANE 1"], "tools": [], "torque": []}], "category": "Carina PBX & Event Manager", "variants": []}, {"title": "2-Gang 2Button Outdoor Intercom", "model": "WL-IC-2GANG-OV -INF / SIP", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["MIC: (3501-1-1)", "LED: (1105-4-1)", "PC Board:(4601-22-1)", "4 pin terminal block: (3102-42-1)", "Cable: (4801-9-1)", "Mic/LED Gasket: (4001-7-1)", "2 Gang Roz Minion: (4801-10-1)", "2 pin terminal block: (3102-06-1)", "3 pin terminal block: (3102-87-1)", "Relay: (3121-5-1)", "2 gang relay board: (4601-37-1)"], "tools": ["Solder iron", "Fluex", "Fluex remover", "Gloves & N95 mask", "#8 ~ 11 are for the relay board for the part kit.", "Brake off 2 & 3 pin terminal block from the 10 pin terminal block (3102-88-1)"], "torque": ["1-2 on HTD"]}, {"name": "Station 2", "materials": ["Universal Gasket: (4001-10-1)", "Dual button faceplate: (4701-49-2)", "Speaker Frogskin: (4001-9-1)", "Mic Frogskin: (4001-11-1)", "O-ring: (3609-2-1)", "Push button: (3303-2-1)", "Speaker Gasket: (4001-15-1)", "Speaker: (3502-7-1)"], "tools": ["Wooden jig", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver"], "torque": ["2-3 on HTD"]}, {"name": "Station 3", "materials": ["Speaker cable: (4801-8-1)", "9/16\u201d spacers: (3611-12-1)", "\u00bc\u201d Hex standoff: (3611-10-1)", "Hex locknut: (3612-5-1)", "POE Module: (6011-3-8)", "\u00bc\u201d spacer: (3611-13-1)", "\u00bd\u201d Socket head cap: (3603-16-1)", "1/4\u201d Socket head cap: (3603-17-1"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam"], "torque": []}, {"name": "Station 4", "materials": ["Test", "Nylon Cable tie: (3607-1-1)", "DSP Label: (4502-5-1)"], "tools": [], "torque": []}, {"name": "Station 5", "materials": ["2 gang back box: (4301-8-1)", "32x1/2\u201d phillips screw: (3603-15-1)", "Box: (4301-8-1)", "Bubble wrap: (4323-2-1)"], "tools": [], "torque": []}], "category": "Intercoms & Modules", "variants": ["INF", "SIP"]}, {"title": "2-Gang No Button Outdoor Intercom", "model": "WL-IC-2GANG-OV -INF / SIP", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["MIC: (3501-1-1)", "LED: (1105-4-1)", "PC Board:(4601-22-1)", "4 pin terminal block: (3102-42-1)", "Cable: (4801-9-1)", "Mic/LED Gasket: (4001-7-1)", "2 Gang Roz Minion: (4801-10-1)", "2 pin terminal block: (3102-06-1)", "3 pin terminal block: (3102-87-1)", "Relay: (3121-5-1)", "2 gang relay board: (4601-37-1)"], "tools": ["Solder iron", "Fluex", "Fluex remover", "Gloves & N95 mask", "#8 ~ 11 are for the relay board for the part kit.", "Brake off 2 & 3 pin terminal block from the 10 pin terminal block (3102-88-1)"], "torque": ["1-2 on HTD"]}, {"name": "Station 2", "materials": ["Universal Gasket: (4001-10-1)", "No button faceplate: (4701-80-1)", "Speaker Frogskin: (4001-9-1)", "Mic Frogskin: (4001-11-1)", "Speaker Gasket: (4001-15-1)", "Speaker: (3502-7-1)"], "tools": ["Wooden jig", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver"], "torque": ["2-3 on HTD"]}, {"name": "Station 3", "materials": ["Speaker cable: (4801-8-1)", "9/16\u201d spacers: (3611-12-1)", "\u00bc\u201d Hex standoff: (3611-10-1)", "Hex locknut: (3612-5-1)", "POE Module: (6011-3-8)", "\u00bc\u201d spacer: (3611-13-1)", "\u00bd\u201d Socket head cap: (3603-16-1)", "1/4\u201d Socket head cap: (3603-17-1"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam"], "torque": []}, {"name": "Station 4", "materials": ["Test", "Nylon Cable tie: (3607-1-1)", "DSP Label: (4502-5-1)"], "tools": [], "torque": []}, {"name": "Station 5", "materials": ["2 gang back box: (4301-8-1)", "32x1/2\u201d phillips screw: (3603-15-1)", "Box: (4301-8-1)", "Bubble wrap: (4323-2-1)"], "tools": [], "torque": []}], "category": "Intercoms & Modules", "variants": ["INF", "SIP"]}, {"title": "2-Gang Outdoor Intercom", "model": "WL-IC-2GANG-OV -INF / SIP", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["MIC: (3501-1-1)", "LED: (1105-4-1)", "PC Board:(4601-22-1)", "4 pin terminal block: (3102-42-1)", "Cable: (4801-9-1)", "Mic/LED Gasket: (4001-7-1)", "2 Gang Roz Minion: (4801-10-1)", "2 pin terminal block: (3102-06-1)", "3 pin terminal block: (3102-87-1)", "Relay: (3121-5-1)", "2 gang relay board: (4601-37-1)"], "tools": ["Solder iron", "Fluex", "Fluex remover", "Gloves & N95 mask", "#8 ~ 11 are for the relay board for the part kit.", "Brake off 2 & 3 pin terminal block from the 10 pin terminal block (3102-88-1)"], "torque": ["1-2 on HTD"]}, {"name": "Station 2", "materials": ["Universal Gasket: (4001-10-1)", "Single button faceplate: (4701-81-1)", "Speaker Frogskin: (4001-9-1)", "Mic Frogskin: (4001-11-1)", "O-ring: (3609-2-1)", "Push button: (3303-2-1)", "Speaker Gasket: (4001-15-1)", "Speaker: (3502-7-1)"], "tools": ["Wooden jig", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver"], "torque": ["2-3 on HTD"]}, {"name": "Station 3", "materials": ["Speaker cable: (4801-8-1)", "9/16\u201d spacers: (3611-12-1)", "\u00bc\u201d Hex standoff: (3611-10-1)", "Hex locknut: (3612-5-1)", "POE Module: (6011-3-8)", "\u00bc\u201d spacer: (3611-13-1)", "\u00bd\u201d Socket head cap: (3603-16-1)", "1/4\u201d Socket head cap: (3603-17-1"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam"], "torque": []}, {"name": "Station 4", "materials": ["Test", "Nylon Cable tie: (3607-1-1)", "DSP Label: (4502-5-1)"], "tools": [], "torque": []}, {"name": "Station 5", "materials": ["2 gang back box: (4301-8-1)", "32x1/2\u201d phillips screw: (3603-15-1)", "Box: (4301-8-1)", "Bubble wrap: (4323-2-1)"], "tools": [], "torque": []}], "category": "Intercoms & Modules", "variants": ["INF", "SIP"]}, {"title": "Back Mount Dual Button Intercom", "model": "WL-IC-BKMT-CAR / INF / SIP-OV-R", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["MIC: (3501-1-1)", "LED: (1105-4-1)", "PC Board:(4601-22-1)", "4 pin terminal block: (3102-42-1)", "Cable: (4801-9-1)", "Mic/LED Gasket: (4001-7-1)"], "tools": ["Solder iron", "Fluex", "Fluex remover", "Gloves & N95 mask", "#8 ~ 11 are for the relay board for the part kit.", "Brake off 2 & 3 pin terminal block from the 10 pin terminal block (3102-88-1)"], "torque": ["1-2 on HTD"]}, {"name": "Station 2", "materials": ["Universal Gasket: (4001-10-1)", "Single button faceplate: (4701-81-1)", "Mic/LED Gasket: (4001-7-1)", "O-ring: (3609-2-1)", "Push button: (3303-2-1)", "Speaker Gasket: (4001-15-1)", "Speaker: (3502-7-1)", "Prebuilt Relay:(4801-16-1)"], "tools": ["Wooden jig", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver"], "torque": ["2-3 on HTD"]}, {"name": "Station 3", "materials": ["Speaker cable: (4801-8-1)", "9/16\u201d spacers: (3611-12-1)", "\u00bc\u201d Hex standoff: (3611-10-1)", "Hex locknut: (3612-5-1)", "POE Module: (6011-3-8)", "\u00bc\u201d spacer: (3611-13-1)", "\u00bd\u201d Socket head cap: (3603-16-1)", "1/4\u201d Socket head cap: (3603-17-1"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam"], "torque": []}, {"name": "Station 4", "materials": ["Test", "Nylon Cable tie: (3607-1-1)", "DSP Label: (4502-5-1)"], "tools": [], "torque": []}, {"name": "Station 5", "materials": ["2 gang back box: (4301-8-1)", "Anti-static Pink Foam:(4323-1-1)", "32x1/2\u201d phillips screw: (3603-15-1)", "Box: (4301-8-1)", "Bubble wrap: (4323-2-1)"], "tools": [], "torque": []}], "category": "Intercoms & Modules", "variants": ["CAR", "INF", "SIP"]}, {"title": "Back Mount Intercom", "model": "WL-IC-BKMT-CAR / INF / SIP-OV-R", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["MIC: (3501-1-1)", "LED: (1105-4-1)", "PC Board:(4601-22-1)", "4 pin terminal block: (3102-42-1)", "Cable: (4801-9-1)", "Mic/LED Gasket: (4001-7-1)"], "tools": ["Solder iron", "Fluex", "Fluex remover", "Gloves & N95 mask", "#8 ~ 11 are for the relay board for the part kit.", "Brake off 2 & 3 pin terminal block from the 10 pin terminal block (3102-88-1)"], "torque": ["1-2 on HTD"]}, {"name": "Station 2", "materials": ["Universal Gasket: (4001-10-1)", "Single button faceplate: (4701-81-1)", "Mic/LED Gasket: (4001-7-1)", "O-ring: (3609-2-1)", "Push button: (3303-2-1)", "Speaker Gasket: (4001-15-1)", "Speaker: (3502-7-1)", "Prebuilt Relay:(4801-16-1)"], "tools": ["Wooden jig", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver"], "torque": ["2-3 on HTD"]}, {"name": "Station 3", "materials": ["Speaker cable: (4801-8-1)", "9/16\u201d spacers: (3611-12-1)", "\u00bc\u201d Hex standoff: (3611-10-1)", "Hex locknut: (3612-5-1)", "POE Module: (6011-3-8)", "\u00bc\u201d spacer: (3611-13-1)", "\u00bd\u201d Socket head cap: (3603-16-1)", "1/4\u201d Socket head cap: (3603-17-1"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam"], "torque": []}, {"name": "Station 4", "materials": ["Test", "Nylon Cable tie: (3607-1-1)", "DSP Label: (4502-5-1)"], "tools": [], "torque": []}, {"name": "Station 5", "materials": ["2 gang back box: (4301-8-1)", "Anti-static Pink Foam:(4323-1-1)", "32x1/2\u201d phillips screw: (3603-15-1)", "Box: (4301-8-1)", "Bubble wrap: (4323-2-1)"], "tools": [], "torque": []}], "category": "Intercoms & Modules", "variants": ["CAR", "INF", "SIP"]}, {"title": "Back Mount No Button Intercom", "model": "WL-IC-BKMT-CAR / INF / SIP-OVNB-R", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["MIC: (3501-1-1)", "LED: (1105-4-1)", "PC Board:(4601-22-1)", "4 pin terminal block: (3102-42-1)", "Cable: (4801-9-1)", "Mic/LED Gasket: (4001-7-1)"], "tools": ["Solder iron", "Fluex", "Fluex remover", "Gloves & N95 mask", "#8 ~ 11 are for the relay board for the part kit.", "Brake off 2 & 3 pin terminal block from the 10 pin terminal block (3102-88-1)"], "torque": ["1-2 on HTD"]}, {"name": "Station 2", "materials": ["Universal Gasket: (4001-10-1)", "Single button faceplate: (4701-80-1)", "Mic/LED Gasket: (4001-7-1)", "O-ring: (3609-2-1)", "Push button: (3303-2-1)", "Speaker Gasket: (4001-15-1)", "Speaker: (3502-7-1)", "Prebuilt Relay:(4801-16-1)"], "tools": ["Wooden jig", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver"], "torque": ["2-3 on HTD"]}, {"name": "Station 3", "materials": ["Speaker cable: (4801-8-1)", "9/16\u201d spacers: (3611-12-1)", "\u00bc\u201d Hex standoff: (3611-10-1)", "Hex locknut: (3612-5-1)", "POE Module: (6011-3-8)", "\u00bc\u201d spacer: (3611-13-1)", "\u00bd\u201d Socket head cap: (3603-16-1)", "1/4\u201d Socket head cap: (3603-17-1"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam"], "torque": []}, {"name": "Station 4", "materials": ["Test", "Nylon Cable tie: (3607-1-1)", "DSP Label: (4502-5-1)"], "tools": [], "torque": []}, {"name": "Station 5", "materials": ["2 gang back box: (4301-8-1)", "Anti-static Pink Foam:(4323-1-1)", "32x1/2\u201d phillips screw: (3603-15-1)", "Box: (4301-8-1)", "Bubble wrap: (4323-2-1)"], "tools": [], "torque": []}], "category": "Intercoms & Modules", "variants": ["CAR", "INF", "SIP"]}, {"title": "Flush Mount Dual Button Intercom", "model": "WL-IC-FLMT-INF / SIP-I-W-R", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["MIC: (3501-1-1)", "LED: (1105-4-1)", "PC Board:(4601-22-1)", "4 pin terminal block: (3102-42-1)", "Cable: (4801-9-1)", "Mic/LED Gasket: (4001-7-1)"], "tools": ["Solder iron", "Fluex", "Fluex remover", "Gloves & N95 mask", "#8 ~ 11 are for the relay board for the part kit.", "Brake off 2 & 3 pin terminal block from the 10 pin terminal block (3102-88-1)"], "torque": ["1-2 on HTD"]}, {"name": "Station 2", "materials": ["Universal Gasket: (4001-10-1)", "Dual button faceplate: (4701-39-2)", "Mic/LED Gasket: (4001-7-1)", "O-ring: (3609-2-1)", "Push button: (3303-2-1)", "Speaker Gasket: (4001-15-1)", "Speaker: (3502-7-1)", "PrebuiltRelay:(4801-16-1)"], "tools": ["Wooden jig", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver"], "torque": ["2-3 on HTD"]}, {"name": "Station 3", "materials": ["Speaker cable: (4801-8-1)", "9/16\u201d spacers: (3611-12-1)", "\u00bc\u201d Hex standoff: (3611-10-1)", "Hex locknut: (3612-5-1)", "POE Module: (6011-3-8)", "\u00bc\u201d spacer: (3611-13-1)", "\u00bd\u201d Socket head cap: (3603-16-1)", "1/4\u201d Socket head cap: (3603-17-1"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam"], "torque": []}, {"name": "Station 4", "materials": ["Test", "Nylon Cable tie: (3607-1-1)", "DSP Label: (4502-5-1)"], "tools": [], "torque": []}, {"name": "Station 5", "materials": ["2 gang back box: (4301-8-1)", "Anti-static Pink Foam:(4323-1-1)", "32x1/2\u201d phillips screw: (3603-15-1)", "Box: (4301-8-1)", "Bubble wrap: (4323-2-1)"], "tools": [], "torque": []}], "category": "Intercoms & Modules", "variants": ["INF", "SIP"]}, {"title": "Flush Mount Intercom", "model": "WL-IC-FLMT-INF / SIP-I-W-R", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["MIC: (3501-1-1)", "LED: (1105-4-1)", "PC Board:(4601-22-1)", "4 pin terminal block: (3102-42-1)", "Cable: (4801-9-1)", "Mic/LED Gasket: (4001-7-1)"], "tools": ["Solder iron", "Fluex", "Fluex remover", "Gloves & N95 mask", "#8 ~ 11 are for the relay board for the part kit.", "Brake off 2 & 3 pin terminal block from the 10 pin terminal block (3102-88-1)"], "torque": ["1-2 on HTD"]}, {"name": "Station 2", "materials": ["Universal Gasket: (4001-10-1)", "Single button faceplate: (4701-83-1)", "Mic/LED Gasket: (4001-7-1)", "O-ring: (3609-2-1)", "Push button: (3303-2-1)", "Speaker Gasket: (4001-15-1)", "Speaker: (3502-7-1)", "PrebuiltRelay:(4801-16-1)"], "tools": ["Wooden jig", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver"], "torque": ["2-3 on HTD"]}, {"name": "Station 3", "materials": ["Speaker cable: (4801-8-1)", "9/16\u201d spacers: (3611-12-1)", "\u00bc\u201d Hex standoff: (3611-10-1)", "Hex locknut: (3612-5-1)", "POE Module: (6011-3-8)", "\u00bc\u201d spacer: (3611-13-1)", "\u00bd\u201d Socket head cap: (3603-16-1)", "1/4\u201d Socket head cap: (3603-17-1"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam"], "torque": []}, {"name": "Station 4", "materials": ["Test", "Nylon Cable tie: (3607-1-1)", "DSP Label: (4502-5-1)"], "tools": [], "torque": []}, {"name": "Station 5", "materials": ["2 gang back box: (4301-8-1)", "Anti-static Pink Foam:(4323-1-1)", "32x1/2\u201d phillips screw: (3603-15-1)", "Box: (4301-8-1)", "Bubble wrap: (4323-2-1)"], "tools": [], "torque": []}], "category": "Intercoms & Modules", "variants": ["INF", "SIP"]}, {"title": "Flush Mount No Button Intercom", "model": "WL-IC-FLMT-INF / SIP-I-W-R", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["MIC: (3501-1-1)", "LED: (1105-4-1)", "PC Board:(4601-22-1)", "4 pin terminal block: (3102-42-1)", "Cable: (4801-9-1)", "Mic/LED Gasket: (4001-7-1)"], "tools": ["Solder iron", "Fluex", "Fluex remover", "Gloves & N95 mask", "#8 ~ 11 are for the relay board for the part kit.", "Brake off 2 & 3 pin terminal block from the 10 pin terminal block (3102-88-1)"], "torque": ["1-2 on HTD"]}, {"name": "Station 2", "materials": ["Universal Gasket: (4001-10-1)", "No button faceplate: (4701-37-2)", "Mic/LED Gasket: (4001-7-1)", "Speaker Gasket: (4001-15-1)", "Speaker: (3502-7-1)", "PrebuiltRelay:(4801-16-1)"], "tools": ["Wooden jig", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver"], "torque": ["2-3 on HTD"]}, {"name": "Station 3", "materials": ["Speaker cable: (4801-8-1)", "9/16\u201d spacers: (3611-12-1)", "\u00bc\u201d Hex standoff: (3611-10-1)", "Hex locknut: (3612-5-1)", "POE Module: (6011-3-8)", "\u00bc\u201d spacer: (3611-13-1)", "\u00bd\u201d Socket head cap: (3603-16-1)", "1/4\u201d Socket head cap: (3603-17-1"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam"], "torque": []}, {"name": "Station 4", "materials": ["Test", "Nylon Cable tie: (3607-1-1)", "DSP Label: (4502-5-1)"], "tools": [], "torque": []}, {"name": "Station 5", "materials": ["2 gang back box: (4301-8-1)", "Anti-static Pink Foam:(4323-1-1)", "32x1/2\u201d phillips screw: (3603-15-1)", "Box: (4301-8-1)", "Bubble wrap: (4323-2-1)"], "tools": [], "torque": []}], "category": "Intercoms & Modules", "variants": ["INF", "SIP"]}, {"title": "SIP Alerter Indoor Intercom", "model": "WL-SPKR-ALT-CAR / INF / SIP", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["MIC: (3501-1-1)", "LED: (1105-4-1)", "PC Board:(4601-61-3)", "5 pin: (3101-28-1)", "Cable: (4801-9-1)", "Mic/LED Gasket: (4001-7-1)"], "tools": ["Solder iron", "Fluex", "Fluex remover", "Gloves & N95 mask", "#8 ~ 11 are for the relay board for the part kit.", "Brake off 2 & 3 pin terminal block from the 10 pin terminal block (3102-88-1)"], "torque": ["1-2 on HTD"]}, {"name": "Station 2", "materials": ["Mic/LED Gasket: (4001-7-1)", "Speaker Gasket: (4001-15-1)", "Speaker: (3502-7-1)"], "tools": ["Wooden jig", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver"], "torque": ["2-3 on HTD"]}, {"name": "Station 3", "materials": ["Speaker cable: (4801-8-1)", "9/16\u201d spacers: (3611-12-1)", "\u00bc\u201d Hex standoff: (3611-10-1)", "Hex locknut: (3612-5-1)", "POE Module: (6011-6-4)", "Skinner: (6005-13-1)", "\u00bc\u201d spacer: (3611-13-1)", "\u00bd\u201d Socket head cap: (3603-16-1)", "1/4\u201d Socket head cap: (3603-17-1)"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam"], "torque": []}, {"name": "Station 4", "materials": ["Test", "Nylon Cable tie: (3607-1-1)", "DSP Label: (4502-5-1)"], "tools": [], "torque": []}, {"name": "Station 5", "materials": ["back box: (4301-58-4)", "Spring Nut:(3612-9-1)", "8-32x3/8\u201d Flat Socket cap screw: (3603-26-1)", "Box: (4301-15-1)"], "tools": [], "torque": []}], "category": "Intercoms & Modules", "variants": ["CAR", "INF", "SIP"]}, {"title": "Surface Mount Dual Button Indoor Intercom", "model": "WL-IC-SMT-CAR / INF / SIP-I2B-W-R", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["MIC: (3501-1-1)", "LED: (1105-4-1)", "PC Board:(4601-61-3)", "5 pin: (3101-28-1)", "Mic/LED Gasket: (4001-7-1)"], "tools": ["Solder iron", "Fluex", "Fluex remover", "Gloves & N95 mask", "#8 ~ 11 are for the relay board for the part kit.", "Brake off 2 & 3 pin terminal block from the 10 pin terminal block (3102-88-1)"], "torque": ["1-2 on HTD"]}, {"name": "Station 2", "materials": ["Single button faceplate: (4701-81-1)", "Mic/LED Gasket: (4001-7-1)", "O-ring: (3609-2-1)", "Push button: (3303-2-1)", "Speaker Gasket: (4001-15-1)", "Speaker: (3502-7-1)", "Skinner:(6005-13-1)"], "tools": ["Wooden jig", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver"], "torque": ["2-3 on HTD"]}, {"name": "Station 3", "materials": ["Speaker cable: (4801-8-1)", "9/16\u201d spacers: (3611-12-1)", "\u00bc\u201d Hex standoff: (3611-10-1)", "Hex locknut: (3612-5-1)", "POE Module: (6011-3-8)", "\u00bc\u201d spacer: (3611-13-1)", "\u00bd\u201d Socket head cap: (3603-16-1)", "1/4\u201d Socket head cap: (3603-17-1)"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam"], "torque": []}, {"name": "Station 4", "materials": ["Test", "Nylon Cable tie: (3607-1-1)", "DSP Label: (4502-5-1)"], "tools": [], "torque": []}, {"name": "Station 5", "materials": ["back box: (4301-58-4)", "Spring Nut:(3612-9-1)", "8-32x3/8\u201d Flat Socket cap screw: (3603-26-1)", "Box: (4301-15-1)"], "tools": [], "torque": []}], "category": "Intercoms & Modules", "variants": ["CAR", "INF", "SIP"]}, {"title": "Surface Mount Panic Button Module", "model": "WL-PBM- SIP / INF / CAR -W-R", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["MIC: (3501-2-1)", "LED: (1105-4-1)", "PC Board:(4601-68-2)", "2 pin: (3101-14-1)", "3pin: (3101-15-1)", "7pin: (3101-16-1)", "3pin Terminal: (3102-87-1)", "Relay: (3121-5-1)", "2pin Right Angle conn: (3102-15-1)"], "tools": ["Solder iron", "Fluex", "Fluex remover", "Gloves & N95 mask", "#8 ~ 11 are for the relay board for the part kit.", "Brake off 2 & 3 pin terminal block from the 10 pin terminal block (3102-88-1)"], "torque": ["1-2 on HTD"]}, {"name": "Station 2", "materials": ["Single button faceplate: (4701-52-2)", "Mic/LED Gasket: (4001-7-1)", "O-ring: (3609-2-1)", "Red Push button: (3303-3-1)", "Mic cable: (4801-12-2)", "Right angle Connector: (3106-4-1)"], "tools": ["Wooden jig", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver"], "torque": ["2-3 on HTD"]}, {"name": "Station 3", "materials": ["9/16\u201d spacers: (3611-12-1)", "\u00bc\u201d Hex standoff: (3611-10-1)", "Hex locknut: (3612-5-1)", "POE Module: (6011-6-4)", "\u00bc\u201d spacer: (3611-13-1)", "\u00bd\u201d Socket head cap: (3603-16-1)", "1/4\u201d Socket head cap: (3603-17-1"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam"], "torque": []}, {"name": "Station 4", "materials": ["Test", "Nylon Cable tie: (3607-1-1)", "DSP Label: (4502-5-1)"], "tools": [], "torque": []}, {"name": "Station 5", "materials": ["Backbox: (4701-53-2)", "Spring nut: (3612-9-1)", "8-32x3/8\u201d screw: (3603-26-1)", "Box: (4301-15-1)", "Bubble wrap: (4323-2-1)"], "tools": [], "torque": []}], "category": "Intercoms & Modules", "variants": ["SIP", "INF", "CAR"]}, {"title": "Surface Mount Signal Button Indoor Intercom", "model": "WL-IC-SMT-CAR / INF / SIP-I-W-R", "teamLabel": "Assembly Line", "teamOptions": ["1", "2", "3", "4"], "stations": [{"name": "Station 1", "materials": ["MIC: (3501-1-1)", "LED: (1105-4-1)", "PC Board:(4601-61-3)", "5 pin: (3101-28-1)", "Mic/LED Gasket: (4001-7-1)"], "tools": ["Solder iron", "Fluex", "Fluex remover", "Gloves & N95 mask", "#8 ~ 11 are for the relay board for the part kit.", "Brake off 2 & 3 pin terminal block from the 10 pin terminal block (3102-88-1)"], "torque": ["1-2 on HTD"]}, {"name": "Station 2", "materials": ["Single button faceplate: (4701-81-1)", "Mic/LED Gasket: (4001-7-1)", "O-ring: (3609-2-1)", "Push button: (3303-2-1)", "Speaker Gasket: (4001-15-1)", "Speaker: (3502-7-1)", "Skinner:(6005-13-1)"], "tools": ["Wooden jig", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver"], "torque": ["2-3 on HTD"]}, {"name": "Station 3", "materials": ["Speaker cable: (4801-8-1)", "9/16\u201d spacers: (3611-12-1)", "\u00bc\u201d Hex standoff: (3611-10-1)", "Hex locknut: (3612-5-1)", "POE Module: (6011-3-8)", "\u00bc\u201d spacer: (3611-13-1)", "\u00bd\u201d Socket head cap: (3603-16-1)", "1/4\u201d Socket head cap: (3603-17-1)"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam"], "torque": []}, {"name": "Station 4", "materials": ["Test", "Nylon Cable tie: (3607-1-1)", "DSP Label: (4502-5-1)"], "tools": [], "torque": []}, {"name": "Station 5", "materials": ["back box: (4301-58-4)", "Spring Nut:(3612-9-1)", "8-32x3/8\u201d Flat Socket cap screw: (3603-26-1)", "Box: (4301-15-1)"], "tools": [], "torque": []}], "category": "Intercoms & Modules", "variants": ["CAR", "INF", "SIP"]}, {"title": "(Horn)OF-Analog", "model": "WL-SPKR-OF-A", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Horn Body (4001-57-1)", "Location: LANE 4", "Grill (4001-56-1)", "Location: LANE 1", "#8x3/4,18-8, T-20 Drive Screw (3605-17-1)", "Location: SHELF 3-F", "Speaker (3502-10-1)", "Location: LANE 1 & 4"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T-20 Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 3 on BSHD, T-20 Screw (3605-17-1)"]}, {"name": "Station 2", "materials": ["Back Box (4001-58-1)", "Location: LANE 3 & 4", "Back Box Gasket (4001-36-1)", "Location: LANE 4", "Pressure Vent Plug (4101-11-1)", "Location: SHELF 4-B", "Nut (3612-13-1)", "Location: SHELF 4-G", "Rusty Rev.C (6011-20-2)", "Location: LANE 4", "Lanyard Tab (3616-1-1)", "Location: SHELF 4-G", "#8x1,18-8, T-20 Drive Screw (3605-18-1)", "Location: SHELF 3-F"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Flathead Screw Driver", "Socket Bit", "Medium/Long T20 Bit", "(OSLD)-Orange Switch Light Torque Driver", "(BSHD)-Blue Switch Heavy Torque Driver", "Adjustable Crescent Wrench", "17mm Socket", "Tweezers", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 3 on OSLD, Nut (3612-13-1)", "Set to 3 on BSHD, T-20 Screw (3605-18-1)"]}, {"name": "Station 3", "materials": ["Testing", "Cable Cover (4001-59-2)", "Location: LANE 1", "Cable Cover Gasket (4001-28-2)", "Location: LANE 1", "M6x1x20, 5mm Socket Screw (3603-43-1)", "Location: SHELF 2-D"], "tools": ["Headset", "(OSLD)-Orange Switch Light Torque Driver", "5mm Hex Bit", "Tweezers/Jumpers", "Tabletop Foam", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)"], "torque": ["May require intuitive torque.", "Set to 1-2 on OSLD, 5mm Hex Bit Screw (3603-43-1)"]}, {"name": "Station 4", "materials": ["Part Kit Materials/Booklet", "(4303-1-1)", "Location: SHELF4-B", "(3603-42-1)", "Location:", "SHELF 2-D", "(3610-20-1)", "Location:", "SHELF 3-B", "(3610-21-1)", "Location:", "SHELF 3-B", "(4702-1-1)", "Location:", "LANE 1", "(3910-1-1)", "Location:", "SHELF 4-F", "Shipping Box (4301-40-1)", "Location: LANE 1", "Divider Insert (4301-39-1)", "Location: LANE 1", "Box Label", "Wahsega Tape (4321-6-1)", "Location: SHELF 11-A"], "tools": ["Bubble Wrap", "Box Cutter", "Tape Gun", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": []}], "category": "Speakers", "variants": []}, {"title": "2x2-2R", "model": "WL-SPKR-22- 2R", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Diecast Housing (4701-181-2),Location: LANE 3 & 4", "6-32x1/2, T-15 Drive Screw (3605-5-1),Location: SHELF-2C", "CCA, Buddy Board (6005-10-4),Location: LANE 4", "Foam Square (3922-1-1), Location: SHELF 9-E", "Aluminum Spacer (3611-16-1),Location: SHELF 3-A", "Microphone (6101-67-1), Location: FRONT BAY 1-A", "Microphone Boot (3609-3-1), Location:SHELF 3-D"], "tools": ["Tweezers", "Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T-15 Bit", "Blue Switch Heavy Torque Driver", "Bin labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Torque setting at 1-2 on HTD- T-15 (Screw 3605-5-1)"]}, {"name": "Station 2", "materials": ["6-32x1/2, T-15 Drive Screw (3605-5-1), Location:SHELF 2-C", "Speaker (3502-11-1), Location:LANE 4"], "tools": ["Speaker Guard", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Blue Switch Heavy Torque Driver", "Bin labeled with the correct part number."], "torque": ["Torque setting at 2-3 on HTD- T-15 (Screw 3605-5-1)"]}, {"name": "Station 3", "materials": ["Testing-Computer"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)"], "torque": []}, {"name": "Station 4", "materials": ["2x2 Ceiling Grill (4703-1-2), Location:LANE 3", "Rivets (3608-1-1), Location: SHELF 3-E", "Shipping Box (4301-38-1), Location: LANE 1", "Box Foam (4301-28-2), Location: BAY 2A or 2C"], "tools": ["Rivet Gun", "Scissors/Box cutter", "Masking Tape", "42x45 Pallet", "Pallet Date Code Sheet", "Bin labeled with the correct part number."], "torque": []}], "category": "Speakers", "variants": []}, {"title": "2x2-A", "model": "WL-SPKR-22- A", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Diecast Housing (4701-181-2), Location: LANE 3 & 4", "6-32x1/2, T-15 Drive Screw (3605-5-1), Location: SHELF 2-C", "Rusty Board (6005-15-4), Location: LANE 4", "Foam Square (3922-1-1), Location: SHELF 9-E", "Aluminum Spacer (3611-16-1), Location: SHELF 3-A"], "tools": ["Tweezers", "Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T-15 Bit", "Blue Switch Heavy Torque Driver", "Bin labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Torque setting at 1-2 on HTD- T-15 (Screw 3605-5-1)"]}, {"name": "Station 2", "materials": ["6-32x1/2, T-15 Drive Screw (3605-5-1), Location:SHELF 2-C", "Speaker (3502-11-1), Location:LANE 4"], "tools": ["Speaker Guard", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver", "Bin Labeled with correct part number."], "torque": ["Torque setting at 2-3 on HTD- T-15 (Screw 3605-5-1)"]}, {"name": "Station 3", "materials": ["Testing"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)"], "torque": []}, {"name": "Station 4", "materials": ["2x2 Ceiling Grill (4703-1-2), Location:LANE 3", "Rivets (3608-1-1), Location: SHELF 3-E", "Shipping Box (4301-38-1), Location: LANE 1", "Box Foam (4301-28-2), Location: BAY 2A or 2C"], "tools": ["Rivet Gun", "Scissors/Box cutter", "Masking Tape", "42x45 Pallet", "Pallet Date Code Sheet", "Bin Labeled with correct part number."], "torque": []}], "category": "Speakers", "variants": []}, {"title": "2x2-CAR/INF/SIP", "model": "WL-SPKR-22- CAR / INF / SIP", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Diecast Housing (4701-181-2), Location: LANE 3 & 4", "6-32x1/2, T-15 Drive Screw (3605-5-1), Location: SHELF-2C", "Schnell Board (6011-24-2), Location: LANE 4", "Foam Square (3922-1-1), Location: SHELF 9-E", "Aluminum Spacer (3611-16-1), Location: SHELF 3-A", "Microphone (6101-67-1), Location: FRONT BAY 1-A", "Microphone Boot (3609-3-1), Location:SHELF 3-D"], "tools": ["Tweezers", "Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T-15 Bit", "Heavy Torque Driver", "Bin labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Torque setting at 1-2 on HTD- T-15 (Screw 3605-5-1)"]}, {"name": "Station 2", "materials": ["6-32x1/2, T-15 Drive Screw (3605-5-1), Location:SHELF 2-C", "Speaker (3502-11-1), Location:LANE 4"], "tools": ["Speaker Guard", "Tweezers", "Magnetizer", "Screw Presenter", "T-15 Bit", "Heavy Torque Driver", "Bin labeled with the correct part number."], "torque": ["Torque setting at 2-3 on HTD- T-15 (Screw 3605-5-1)"]}, {"name": "Station 3", "materials": ["Testing"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)"], "torque": []}, {"name": "Station 4", "materials": ["2x2 Ceiling Grill (4703-1-3), Location:LANE 3", "Rivets (3608-1-1), Location: SHELF 3-E", "Shipping Box (4301-38-1), Location: LANE 1", "Box Foam (4301-28-2), Location: BAY 2A or 2C"], "tools": ["Rivet Gun", "Scissors/Box cutter", "Masking Tape", "60x40 Pallet", "Pallet Date Code Sheet", "Bin labeled with the correct part number."], "torque": []}], "category": "Speakers", "variants": ["CAR", "INF", "SIP"]}, {"title": "510-CAR/INF-F", "model": "WL-IPD-SPKR-510- CAR / INF -F", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Extrusion (4701-117-1),", "Location: LANE 2", "Right Side Plate (4001-27-1),", "Location: LANE 2", "8-32x3/4, T-20 Drive Screw (3605-6-1), Location:SHELF 2-B", "Schnell Board (6011-24-1),", "Location: LANE 4", "Imelda Board (6005-14-4)", "Location: LANE 4", "Marigold Board (6101-64-1),", "Location: Front Bay 1-A", "Support Snap (4101-4-1),", "Location: SHELF 4-D & F", "Aluminum Spacer (3611-16-1),", "Location: SHELF 3-A", "6-32x1/2, T-15 Drive Screw (3605-5-1), Location: SHELF 2-C", "Short Power Cable (4802-15-2),", "Location: SHELF 6-B", "Ribbon Cable (4802-14-2),", "Location: SHELF 6-B"], "tools": ["Jigs", "Inspection Gauges", "Black Industrial Paint Marker", "Screw Presenter", "Magnetizer", "Medium/Long T-20 Bit", "Medium/Long T-15 Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "(OSLD)-Orange Switch Light Torque Driver", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 2-3 on BSHD, T-20 Screw (3605-6-1)", "Set to 4 on OSLD, T-15 Screw (3605-5-1)"]}, {"name": "Station 2", "materials": ["LED Panel (1121-1-2),", "Location: LANE 3", "Sparks Board (6001-49-2),", "Location: LANE 4", ") Dante Board (4601-79-1)", "Location: SHELF 5-F", "6.1 mm Tooth Lock Washer (3610-14-1), Location: SHELF 3-C", "M3x.5, T-10 drive Screw (3603-44-1),", "Location: SHELF 2-C", "4-40x.25, T-10 Drive Screw (3605-10-1), Location: SHELF 2-A", "Mic (6101-65-1), Location: FRONT BAY 1-A", "Mic Boot (3609-3-1), Location: SHELF 3-D", "Speaker (3502-11-1), Location: LANE 4", "370 in Flat Washer (3610-13-1),", "Location: SHELF 3-C", "168 in Tooth Lock Washer (3610-11-1)", "Location: SHELF 3-C", "8-32x.5, T-20 Drive Screw (3605-9-1), Location: SHELF 2-A"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T10 Bit", "Medium/Long T-20 Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "(OSLD)-Orange Switch Light Torque Driver", "Speaker Guard", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 4 on OSLD, T-10 Screw (3603-37-1)", "Set to 2 on OSLD, T-10 Screw (3605-10-1)", "Set to 1-2 on BSHD, T-20 Screw (3605-9-1)"]}, {"name": "Station 3", "materials": ["Testing", "Faceplate (4001-24-1)", "Location: LANE 4", "8-32x3/4, T-20 Drive Screw (3605-6-1), Location: SHELF 2-B", "Lightpipe (4101-5-1), Location: SHELF 4-F"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)"], "torque": []}, {"name": "Station 4", "materials": ["Part Kit Materials/Booklet", "(4303-1-1), Location:", "SHELF 4-B", "(3605-11-1), Location:", "SHELF 2-A", "(3605-12-1) Location:", "SHELF 3-G", "(3610-11-1) Location:", "SHELF 3-C", "(3603-28-1) Location:", "SHELF 2-E", "(3610-10-1) Location:", "SHELF 3-C", "Diagram Label", "Left Side Plate (4001-26-1)", "Location: LANE 2", "8-32x.5, Philips Drive Screw (3605-11-1)", "Location: SHELF 2-A", "Plastic Bags (4303-4-1)", "Location: SHELF 9-D", "Big MAC Label", "Foam Endcaps (4301-17-3)", "Location: BAY 4-A", "Shipping Box (4301-18-1)", "Location: LANE 1", "Mounting Bracket (4701-132-1)", "Location: LANE 2", "Bracket Caps (4101-9-1)", "Location: SHELF 4-C", "Wahsega Tape (4321-6-1)", "Location: SHELF 11-A"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T-20 Bit", "(OSLD)-Orange Switch Light Torque Driver", "Bins labeled with the correct part number. (Part number and bin number should match)", "Medium/Long Phillips Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "Tape Gun", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 2-3 on OSLD, T-20 Screw (3605-6-1)", "Set to 2-3 on BSHD, Phillips Screw (3605-11-1)"]}], "category": "Speakers", "variants": ["CAR", "INF"]}, {"title": "510D-CAR/INF-F", "model": "WL-IPD-SPKR-510D- CAR / INF -F", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": [") Top Extrusion (4701-140-1)", "Location: LANE 2", ") Bottom Extrusion", "(4701-146-1)", "Location: LANE 2", ") Left Side Plate (4701-144-3)", "Location: Front Bay 1-A", ") Hex Wall Mount (4701-136-3)", "Location: Front Bay 1-A&D", ") Right Side Plate (4701-145-3)", "Location: Front Bay 1-A", ") 8-32x3/4, T-20 Drive Screw (3605-6-1)", "Location:SHELF 2-B", ") Schnell Board (6011-24-1)", "Location: LANE 4", ") Imelda Board (6005-14-4)", "Location: LANE 4", ") Power Extension Board (6001-51-3)", "Location: LANE 4", ") 6-32x3/8, T15 (3605-8-1)", "Location:SHELF 2-B", ") Marigold Board (6101-64-1)", "Location: Front Bay 1-A", ") Support Snap (4101-4-1)", "Location: SHELF 4-D&F", ") Aluminum Spacer (3611-16-1)", "Location: SHELF 3-A", ") 6-32x1/2, T-15 Drive Screw (3605-5-1)", "Location: SHELF 2-C", ") Short Power Cable (4802-15-2)", "Location: SHELF 6-B", ") Ribbon Cable (4802-14-2)", "Location: SHELF 6-B"], "tools": ["Jigs", "Inspection Gauges", "Black Industrial Paint Marker", "Screw Presenter", "Magnetizer", "Medium/Long T-20 Bit", "Medium/Long T-15 Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "(OSLD)-Orange Switch Light Torque Driver", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 2-3 on BSHD, T-20 Screw (3605-6-1)", "Set to 4 on OSLD, T-15 Screw (3605-5-1)"]}, {"name": "Station 2", "materials": [") LED Panel (1121-1-2)", "Location: LANE 3", ") Sparks Board (6001-49-2)", "Location: LANE 4", ") Dante Board (4601-79-1)", "Location: SHELF 5-F", ") Audio Splitter Board (6001-52-1)", "Location: LANE 4", ") 6.1 mm Tooth Lock Washer (3610-14-1)", "Location: SHELF 3-C", ") M3x.5, T-10 drive Screw (3603-44-1)", "Location: SHELF 2-C", ") 4-40x.25, T-10 Drive Screw (3605-10-1)", "Location: SHELF 2-A", ") Mic (6101-65-1)", "Location: FRONT BAY 1-A", ") Mic Boot (3609-3-1)", "Location: SHELF 3-D", ") Speakers (3502-11-1)", "Location: LANE 4", ") 550mm Audio Cable (4801-29-1)", "Location: SHELF 5-A", ") 300mm Audio Cable (4801-28-1)", "Location: SHELF 5-A", ") .370 in Flat Washer (3610-13-1)", "Location: SHELF 3-C", ") .168 in Tooth Lock Washer (3610-11-1)", "Location: SHELF 3-C", ") 8-32x.5, T-20 Drive Screw (3605-9-1)", "Location: SHELF 2-A"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T10 Bit", "Medium/Long T-20 Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "(OSLD)-Orange Switch Light Torque Driver", "Speaker Guard", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 4 on OSLD, T-10 Screw (3603-37-1)", "Set to 2 on OSLD, T-10 Screw (3605-10-1)", "Set to 1-2 on BSHD, T-20 Screw (3605-9-1)"]}, {"name": "Station 3", "materials": [") Testing", ") Faceplate (4001-24-1)", "Location: LANE 4", ") 8-32x3/4, T-20 Drive Screw (3605-6-1)", "Location: SHELF 2-B", ") Lightpipe (4101-5-1)", "Location: SHELF 4-F"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)"], "torque": []}, {"name": "Station 4", "materials": [") Part Kit Materials/Booklet", "(4303-1-1)", "Location: SHELF 4-B", "(3605-11-1)", "Location: SHELF 2-A", "(3610-16-1)", "Location: SHELF 3-C", "(3610-4-1)", "Location: SHELF 3-C", "(3613-1-1)", "Location: SHELF 4-G", "(3612-6-1)", "Location: SHELF 3-A", ") Diagram Label", ") T-Nuts (3612-11-1)", "Location: SHELF 3-A", ") \u00bc\u201d Flat Washer (3610-4-1)", "Location: SHELF 3-C", ") \u00bc\u201d Split Lock Washer (3610-16-1)", "Location: SHELF 3-C", ") Eye Bolt (3613-1-1)", "Location: SHELF 4-G", ") 1/4-20x3/4 Hex Cap Screw (3603-19-1)", "Location: SHELF 2-E", ") Left Side Plate (4701-145-3)", "Location: Front Bay 1-A", "Plastic Bags (4303-5-1)", "Location: SHELF 9-D", "Big MAC Label", "Right Foam Endcaps (4301-23-3)", "Location:Bay 5-B & 7-C", "Left Foam Endcaps (4301-24-1)", "Location:Bay 5-B & C", "Shipping Box (4301-22-3)", "Location: LANE 1", "Wahsega Tape (4321-6-1)", "Location: SHELF 11-A", ") Phillips Screw (3605-11-1)", "Location: SHELF 2-A"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T-20 Bit", "(OSLD)-Orange Switch Light Torque Driver", "11mm/ universal socket", "Bins labeled with the correct part number. (Part number and bin number should match)", "Medium/Long Phillips Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "Tape Gun", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 2-3 on OSLD, T-20 & Hex Screw (3605-6-1) & (3603-19-1)", "Set to 2-3 on BSHD, Phillips Screw (3605-11-1)"]}], "category": "Speakers", "variants": ["CAR", "INF"]}, {"title": "510D-CAR/INF-F-TM", "model": "WL-IPD-SPKR-510D-CAR /INF-F-TM", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": [") Top Extrusion (4701-167-1)", "Location: LANE 2", ") Bottom Extrusion", "(4701-146-1)", "Location: LANE 2", ") Left Side Plate (4701-145-3)", "Location: Front Bay 1-A", ") 8-32x3/4, T-20 Drive Screw (3605-6-1)", "Location:SHELF 2-B", ") Schnell Board (6011-24-1)", "Location: LANE 4", ") Imelda Board (6005-14-4)", "Location: LANE 4", ") Power Extension Board (6001-51-3)", "Location: LANE 4", ") 6-32x3/8, T15 (3605-8-1)", "Location:SHELF 2-B", ") Marigold Board (6101-64-1)", "Location: Front Bay 1-A", ") Support Snap (4101-4-1)", "Location: SHELF 4-D&F", ") Aluminum Spacer (3611-16-1)", "Location: SHELF 3-A", ") 6-32x1/2, T-15 Drive Screw (3605-5-1)", "Location: SHELF 2-C", ") Short Power Cable (4802-15-2)", "Location: SHELF 6-B", ") Ribbon Cable (4802-14-2)", "Location: SHELF 6-B", ") Ethernet Cable, 3ft, Blue (4802-1-1)", "Location: SHELF 6-C"], "tools": ["Jigs", "Inspection Gauges", "Black Industrial Paint Marker", "Screw Presenter", "Magnetizer", "Medium/Long T-20 Bit", "Medium/Long T-15 Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "(OSLD)-Orange Switch Light Torque Driver", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 2-3 on BSHD, T-20 Screw (3605-6-1)", "Set to 4 on OSLD, T-15 Screw (3605-5-1)"]}, {"name": "Station 2", "materials": [") LED Panel (1121-1-2)", "Location: LANE 3", ") Sparks Board (6001-61-1)", "Location: LANE 4", ") Dante Board (4601-79-1)", "Location: SHELF 5-F", ") Audio Splitter Board (6001-52-1)", "Location: SHELF 6-A", ") 6.1 mm Tooth Lock Washer (3610-14-1)", "Location: SHELF 3-C", ") M3x.5, T-10 drive Screw (3603-44-1)", "Location: SHELF 2-C", ") 4-40x.25, T-10 Drive Screw (3605-10-1)", "Location: SHELF 2-A", ") Mic (6101-65-1)", "Location: FRONT BAY 1-A", ") Mic Boot (3609-3-1)", "Location: SHELF 3-D", ") Speakers (3502-11-1)", "Location: LANE 4", ") 550mm Audio Cable (4801-29-1)", "Location: SHELF 5-A", ") 300mm Audio Cable (4801-28-1)", "Location: SHELF 5-A", ") .370 in Flat Washer (3610-13-1)", "Location: SHELF 3-C", ") .168 in Tooth Lock Washer (3610-11-1)", "Location: SHELF 3-C", ") 8-32x.5, T-20 Drive Screw (3605-9-1)", "Location: SHELF 2-A"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T10 Bit", "Medium/Long T-20 Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "(OSLD)-Orange Switch Light Torque Driver", "Speaker Guard", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 4 on OSLD, T-10 Screw (3603-37-1)", "Set to 2 on OSLD, T-10 Screw (3605-10-1)", "Set to 1-2 on BSHD, T-20 Screw (3605-9-1)"]}, {"name": "Station 3", "materials": [") Testing", ") Faceplate (4001-24-1)", "Location: LANE 4", ") 8-32x3/4, T-20 Drive Screw (3605-6-1)", "Location: SHELF 2-B", ") Lightpipe (4101-5-1)", "Location: SHELF 4-F"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)", "Ethernet Adaptor"], "torque": []}, {"name": "Station 4", "materials": [") Part Kit Materials/Booklet", "(4303-1-1)", "Location: SHELF 4-B", "(3610-16-1)", "Location: SHELF 3-C", "(3610-4-1)", "Location: SHELF 3-C", "(3603-19-1)", "Location: SHELF 2-E", "(3612-6-1)", "Location: SHELF 3-A", "(3610-19-1)", "Location: SHELF 3-B", "(3610-17-1)", "Location: SHELF 3-B", "(3603-39-1)", "Location: SHELF 3-A", "(3612-12-1)", "Location: SHELF 4-G", "(3610-18-1)", "Location: SHELF 3-B", "(4802-16-1)", "Location: SHELF 6-B", ") Diagram Label", ") Grommet (4101-10-1) Location: SHELF 4-B", ") Black Hole Insert Plug (4101-7-1) Location: SHELF 4-D", ") T-Nuts (3612-11-1) Location: SHELF 3-A", ") \u00bc\u201d Flat Washer (3610-4-1) Location: SHELF 3-C", ") \u00bc\u201d Split Lock Washer (3610-16-1)", "Location: SHELF 3-C", ") 1/4-20x3/4 Hex Cap Screw (3603-19-1)", "Location: SHELF 2-E", ") Ceiling Hex Mount (4701-170-1)", "Location: Front Bay 1-A", ") Left Side Plate (4701-145-3)", "Location: Front Bay 1-A", ")Plastic Bags (4303-5-1)", "Location: SHELF 9-D", ")Big MAC Label", ")Foam Endcaps (4301-30-3)", "Location:Bay 7-C", ")Foam Endcaps (4301-35-1)", "Location:Bay 6-B & 7-C", ")Shipping Box (4301-32-3)", "Location: LANE 1", ") Wahsega Tape (4321-6-1)", "Location: SHELF 11-A", ") Phillips Screw (3605-11-1)", "Location: SHELF 2-A"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T-20 Bit", "(OSLD)-Orange Switch Light Torque Driver", "11mm/ universal socket", "Bins labeled with the correct part number. (Part number and bin number should match)", "Medium/Long Phillips Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "Tape Gun", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 2-3 on OSLD, T-20 & Hex Screw (3605-6-1) & (3603-19-1)", "Set to 2-3 on BSHD, Phillips Screw (3605-11-1)"]}], "category": "Speakers", "variants": ["CAR", "INF"]}, {"title": "520-CAR-F", "model": "WL-IPD-SPKR-520- CAR -F/ INF-F", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Extrusion (4701-118-1)", "Location: LANE 2", "Right Side Plate (4001-27-1)", "Location: LANE 2", "8-32x3/4, T-20 Drive Screw (3605-6-1)", "Location:SHELF 2-B", "Schnell Board (6011-24-1)", "Location: LANE 4", "Imelda Board (6005-14-4)", "Location: LANE 4", "Marigold Board (6101-64-1)", "Location: Front Bay 1-A", "Support Snap (4101-4-1)", "Location: SHELF 4-D & F", "Aluminum Spacer (3611-16-1)", "Location: SHELF 3-A", "6-32x1/2, T-15 Drive Screw (3605-5-1)", "Location: SHELF 2-C", "Short Power Cable (4802-15-2)", "Location: SHELF 6-B", "Ribbon Cable (4802-14-2)", "Location: SHELF 6-B", "Power Extension Board (6001-51-3)", "Location: LANE 4", "Long Power Cable (4801-27-1)", "Location: SHELF 5-A & F", "Screw (3605-8-1)", "Location: SHELF 2-A"], "tools": ["Jigs", "Inspection Gauges", "Black Industrial Paint Marker", "Screw Presenter", "Magnetizer", "Medium/Long T-20 Bit", "Medium/Long T-15 Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "(OSLD)-Orange Switch Light Torque Driver", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 2-3 on BSHD, T-20 Screw (3605-6-1)", "Set to 4 on OSLD, T-15 Screw (3605-5-1)", "(3605-8-1)"]}, {"name": "Station 2", "materials": ["LED Panel (1121-1-2)", "Location: LANE 3", "Sparks Board (6001-49-2)", "Location: LANE 4", "Dante Board (4601-79-1)", "Location: SHELF 5-F", "6.1 mm Tooth Lock Washer (3610-14-1)", "Location: SHELF 3-C", "M3x.5, T-10 drive Screw (3603-44-1)", "Location: SHELF 2-C", "4-40x.25, T-10 Drive Screw (3605-10-1)", "Location: SHELF 2-A", "Mic (6101-65-1)", "Location: FRONT BAY 1-A", "Mic Boot (3609-3-1)", "Location: SHELF 3-D", "Speaker (3502-11-1)", "Location: LANE 4", "370 in Flat Washer (3610-13-1)", "Location: SHELF 3-C", "168 in Tooth Lock Washer (3610-11-1)", "Location: SHELF 3-C", "8-32x.5, T-20 Drive Screw (3605-9-1)", "Location: SHELF 2-A"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T10 Bit", "Medium/Long T-20 Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "(OSLD)-Orange Switch Light Torque Driver", "Speaker Guard", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 4 on OSLD, T-10 Screw (3603-37-1)", "Set to 2 on OSLD, T-10 Screw (3605-10-1)", "Set to 1-2 on BSHD, T-20 Screw (3605-9-1)"]}, {"name": "Station 3", "materials": ["Testing", "Faceplate (4001-19-2)", "Location: LANE 4", "8-32x3/4, T-20 Drive Screw (3605-6-1)", "Location: SHELF 2-B", "Lightpipe (3608-1-1)", "Location: SHELF 4-F"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)"], "torque": []}, {"name": "Station 4", "materials": ["Part Kit Materials/Booklet", "(4303-1-1), Location:SHELF 4-B", "(3605-11-1),", "Location: SHELF 2-A", "(3605-12-1)", "Location: SHELF 3-G", "(3610-11-1)", "Location: SHELF 3-C", "(3603-28-1)", "Location: SHELF 2-E", "(3610-10-1)", "Location: SHELF 3-C", "Diagram Label", "Left Side Plate (4001-26-1)", "Location: LANE 2", "U-Shape Faceplate (4701\u2013159-2)", "Location: FRONT BAY1-A", "5\u2019 Foam Tape (3921-2-1)", "Location: SHELF 9-E", "3D Printed Spacers (3614-1-1)", "Location: SHELF 9-B", "Painters Tape", "8-32x.5, Philips Drive Screw (3605-11-1)", "Location: SHELF 2-A", "Plastic Bags (4303-5-1)", "Location: SHELF 9-D", "Big MAC Label", "Foam Endcaps (4301-17-3)", "Location: BAY 4-A", "Shipping Box (4301-27-1)", "Location: LANE 1", "Mounting Bracket (4701-132-1)", "Location: LANE 2", "Bracket Caps (4101-9-1)", "Location: SHELF 4-C", "Wahsega Tape (4321-6-1)", "Location: SHELF 11-A", "Foam Middle Piece (4301-33-1)", "Location: BAY 2-C & 3-A"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T-20 Bit", "(OSLD)-Orange Switch Light Torque Driver", "Bins labeled with the correct part number. (Part number and bin number should match)", "Medium/Long Phillips Bit T-20", "(BSHD)-Blue Switch Heavy Torque Driver", "Tape Gun", "Bins labeled with the correct part number. (Part number and bin number should match)", "60x40 Pallet", "Alcohol/Wipes", "Pallet Date code Sheet"], "torque": ["Set to 2-3 on OSLD, T-20 Screw (3605-6-1)", "Set to 2-3 on BSHD, Phillips Screw T-20 (3605-11-1)"]}], "category": "Speakers", "variants": ["CAR", "INF"]}, {"title": "540-CAR/INF-F", "model": "WL-IPD-SPKR-540-CAR / INF-F", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Extrusion (4701-143-1)", "Location: LANE 2", "Right Side Plate (4001-27-1)", "Location: LANE 2", "8-32x3/4, T-20 Drive Screw (3605-6-1)", "Location:SHELF 2-B", "Schnell Board (6011-24-1)", "Location: LANE 4", "Imelda Board (6005-14-4)", "Location: LANE 4", "Marigold Board (6101-64-1)", "Location: Front Bay 1-A", "Support Snap (4101-4-1)", "Location: SHELF 4-D & F", "Aluminum Spacer (3611-16-1)", "Location: SHELF 3-A", "6-32x1/2, T-15 Drive Screw (3605-5-1)", "Location: SHELF 2-C", "Short Power Cable (4802-15-2)", "Location: SHELF 6-B", "Ribbon Cable (4802-14-2)", "Location: SHELF 6-B", "Short ribbon cable (4802-22-1)", "Location: SHELF 6-A", "Power Extension Board (6001-51-3)", "Location: LANE 4", "Long Power Cable (4801-27-1)", "Location: SHELF 5-A & F", "Screw (3605-8-1)", "Location: SHELF 2-A", "Data Cable Extender (4601-89-1)", "Location: SHELF 5-E"], "tools": ["Jigs", "Inspection Gauges", "Black Industrial Paint Marker", "Screw Presenter", "Magnetizer", "Medium/Long T-20 Bit", "Medium/Long T-15 Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "(OSLD)-Orange Switch Light Torque Driver", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 2-3 on BSHD, T-20 Screw (3605-6-1)", "Set to 4 on OSLD, T-15 Screw (3605-5-1)", "(3605-8-1)"]}, {"name": "Station 2", "materials": ["LED Panel (1121-1-2)", "Location: LANE 3", "Sparks Board (6001-49-2)", "Location: LANE 4", "Dante Board (4601-79-1)", "Location: SHELF 5-F", "6.1 mm Tooth Lock Washer (3610-14-1)", "Location: SHELF 3-C", "M3x.5, T-10 drive Screw (3603-44-1)", "Location: SHELF 2-C", "4-40x.25, T-10 Drive Screw (3605-10-1)", "Location: SHELF 2-A", "Mic (6101-65-1)", "Location: FRONT BAY 1-A", "Mic Boot (3609-3-1)", "Location: LANE 4", "Speaker (3502-11-1)", "Location: LANE 4", "Audio Splitter Board (6001-52-1)", "Location: LANE 4", "300mm Audio Cable (4801-28-1)", "Location: SHELF 5-A", "1250 mm Audio Cable (4801-30-1)", "Location: SHELF 6-E", "370 in Flat Washer (3610-13-1)", "Location: SHELF 3-C", "168 in Tooth Lock Washer (3610-11-1)", "Location: SHELF 3-C", "8-32x.5, T-20 Drive Screw (3605-9-1)", "Location: SHELF 2-A"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T10 Bit", "Medium/Long T-20 Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "(OSLD)-Orange Switch Light Torque Driver", "Speaker Guard", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 4 on OSLD, T-10 Screw (3603-37-1)", "Set to 2 on OSLD, T-10 Screw (3605-10-1)", "Set to 1-2 on BSHD, T-20 Screw (3605-9-1)"]}, {"name": "Station 3", "materials": ["Testing", "Faceplate (4001-19-2)", "Location: LANE 4", "8-32x3/4, T-20 Drive Screw (3605-6-1)", "Location: SHELF 2-B", "Lightpipe (4101-5-1)", "Location: SHELF 4-F"], "tools": ["Headset", "Masking Tape", "Tweezers/Jumpers", "Tabletop Foam", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)"], "torque": []}, {"name": "Station 4", "materials": ["Part Kit Materials/Booklet", "(4303-1-1), Location:SHELF 4-B", "(3605-11-1),", "Location: SHELF 2-A", "(3605-12-1)", "Location: SHELF 3-G", "(3610-11-1)", "Location: SHELF 3-C", "(3603-28-1)", "Location: SHELF 2-E", "(3610-10-1)", "Location: SHELF 3-C", "Diagram Label", "Left Side Plate (4001-26-1)", "Location: LANE 2", "Top Plate (4701-149-3)", "Location: FRONT BAY 1-B", "Bottom Plate (4701-150-2)", "Location: FRONT BAY 1-B", "5\u2019 Foam Tape (3921-2-1)", "Location: SHELF 9-E", "3D Printed Spacers (3614-1-1)", "Location: SHELF 9-B", "Painters Tape", "8-32x.5, Philips Drive Screw (3605-11-1)", "Location: SHELF 2-A", "Plastic Bags (4303-5-1)", "Location: SHELF 9-D", "Big MAC Label", "Foam Endcaps (4301-17-3)", "Location: BAY 4-A", "Shipping Box (4301-21-1)", "Location: LANE 1", "Mounting Bracket (4701-132-1)", "Location: LANE 2", "Bracket Caps (4101-9-1)", "Location: SHELF 4-C", "Wahsega Tape (4321-6-1)", "Location: SHELF 11-A", "Foam Middle Piece (4301-33-1)", "Location: BAY 2-C & 3-A"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T-20 Bit", "(OSLD)-Orange Switch Light Torque Driver", "Bins labeled with the correct part number. (Part number and bin number should match)", "Medium/Long Phillips Bit T-20", "(BSHD)-Blue Switch Heavy Torque Driver", "Tape Gun", "Bins labeled with the correct part number. (Part number and bin number should match)", "60x40 Pallet", "Alcohol/Wipes", "Pallet Date code Sheet"], "torque": ["Set to 2-3 on OSLD, T-20 Screw (3605-6-1)", "Set to 2-3 on BSHD, Phillips Screw T-20 (3605-11-1)"]}], "category": "Speakers", "variants": ["CAR", "INF"]}, {"title": "Grey (Horn)OF-CAR/INF", "model": "WL-SPKR-OF- CAR / INF", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Horn Body (4001-57-1)", "Location: LANE 4", "Grill (4001-56-1)", "Location: LANE 1", "#8x3/4,18-8, T-20 Drive Screw (3605-17-1)", "Location: SHELF 3-F", "Speaker (3502-10-1)", "Location: LANE 1 & 4"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T-20 Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 3 on BSHD, T-20 Screw (3605-17-1)"]}, {"name": "Station 2", "materials": ["Back Box (4001-58-1)", "Location: LANE 3 & 4", "Back Box Gasket (4001-36-1)", "Location: LANE 4", "Pressure Vent Plug (4101-11-1)", "Location: SHELF 4-B", "Nut (3612-13-1)", "Location: SHELF 4-G", "Veloso CC (6011-18-1)", "Location: LANE 4", "Lanyard Tab (3616-1-1)", "Location: SHELF 4-G", "#8x1,18-8, T-20 Drive Screw (3605-18-1)", "Location: SHELF 3-F"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Flathead Screw Driver", "Socket Bit", "Medium/Long T20 Bit", "(OSLD)-Orange Switch Light Torque Driver", "(BSHD)-Blue Switch Heavy Torque Driver", "Adjustable Crescent Wrench", "17mm Socket", "Tweezers", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 3 on OSLD, Nut (3612-13-1)", "Set to 3 on BSHD, T-20 Screw (3605-18-1)"]}, {"name": "Station 3", "materials": ["Testing", "Cable Cover (4001-59-2)", "Location: LANE 1", "Cable Cover Gasket (4001-28-2)", "Location: LANE 1", "M6x1x20, 5mm Socket Screw (3603-43-1)", "Location: SHELF 2-D"], "tools": ["Headset", "(OSLD)-Orange Switch Light Torque Driver", "5mm Hex Bit", "Tweezers/Jumpers", "Tabletop Foam", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)"], "torque": ["May require intuitive torque.", "Set to 1-2 on OSLD, 5mm Hex Bit Screw (3603-43-1)"]}, {"name": "Station 4", "materials": ["Part Kit Materials/Booklet", "(4303-1-1)", "Location: SHELF4-B", "(3603-42-1)", "Location:", "SHELF 2-D", "(3610-20-1)", "Location:", "SHELF 3-B", "(3610-21-1)", "Location:", "SHELF 3-B", "(4702-1-1)", "Location:", "LANE 1", "(3910-1-1)", "Location:", "SHELF 4-F", "Shipping Box (4301-40-1)", "Location: LANE 1", "Divider Insert (4301-39-1)", "Location: LANE 1", "Box Label", "Wahsega Tape (4321-6-1)", "Location: SHELF 11-A"], "tools": ["Bubble Wrap", "Box Cutter", "Tape Gun", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": []}], "category": "Speakers", "variants": ["CAR", "INF"]}, {"title": "OG White (Horn)OF-CAR/INF", "model": "WL-SPKR-OF- CAR / INF", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Horn Body (4001-35-1)", "Location: LANE 4", "Grill (4001-34-1)", "Location: LANE 1", "#8x3/4,18-8, T-20 Drive Screw (3605-17-1)", "Location: SHELF 3-F", "Speaker (3502-10-1)", "Location: LANE 1 & 4"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Medium/Long T-20 Bit", "(BSHD)-Blue Switch Heavy Torque Driver", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 3 on BSHD, T-20 Screw (3605-17-1)"]}, {"name": "Station 2", "materials": ["Back Box (4001-37-1)", "Location: LANE 3 & 4", "Back Box Gasket (4001-36-1)", "Location: LANE 4", "Pressure Vent Plug (4101-11-1)", "Location: SHELF 4-B", "Nut (3612-13-1)", "Location: SHELF 4-G", "Veloso CC (6011-18-1)", "Location: LANE 4", "Lanyard Tab (3616-1-1)", "Location: SHELF 4-G", "#8x1,18-8, T-20 Drive Screw (3605-18-1)", "Location: SHELF 3-F"], "tools": ["Jigs", "Screw Presenter", "Magnetizer", "Flathead Screw Driver", "Socket Bit", "Medium/Long T20 Bit", "(OSLD)-Orange Switch Light Torque Driver", "(BSHD)-Blue Switch Heavy Torque Driver", "Adjustable Crescent Wrench", "17mm Socket", "Tweezers", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Set to 3 on OSLD, Nut (3612-13-1)", "Set to 3 on BSHD, T-20 Screw (3605-18-1)"]}, {"name": "Station 3", "materials": ["Testing", "Cable Cover (4001-38-1)", "Location: LANE 1", "Cable Cover Gasket (4001-28-2)", "Location: LANE 1", "M6x1x20, 5mm Socket Screw (3603-43-1)", "Location: SHELF 2-D"], "tools": ["Headset", "(OSLD)-Orange Switch Light Torque Driver", "5mm Hex Bit", "Tweezers/Jumpers", "Tabletop Foam", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)"], "torque": ["May require intuitive torque.", "Set to 1-2 on OSLD, 5mm Hex Bit Screw (3603-43-1)"]}, {"name": "Station 4", "materials": ["Part Kit Materials/Booklet", "(4303-1-1)", "Location: SHELF4-B", "(3603-42-1)", "Location:", "SHELF 2-D", "(3610-20-1)", "Location:", "SHELF 3-B", "(3610-21-1)", "Location:", "SHELF 3-B", "(4702-1-1)", "Location:", "LANE 1", "(3910-1-1)", "Location:", "SHELF 4-F", "Shipping Box (4301-40-1)", "Location: LANE 1", "Divider Insert (4301-39-1)", "Location: LANE 1", "Box Label", "Wahsega Tape (4321-6-1)", "Location: SHELF 11-A"], "tools": ["Bubble Wrap", "Box Cutter", "Tape Gun", "Bins labeled with the correct part number. (Part number and bin number should match)"], "torque": []}], "category": "Speakers", "variants": ["CAR", "INF"]}, {"title": "SMT", "model": "WL-SPKR-SMT-CAR / INF/SIP", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Extrusion (4701-116-1)", "Location: LANE 2", "8-32x3/4, T-20 Drill Bit, Screw (3605-6-1) Location:SHELF 2-B", "Right side Plate (4001-27-1)", "Location: LANE 2", "Schnell Board (6011-24-1)", "Location: LANE 4", "Screw 6-32x1/2 T-15 Drill Bit (3605-5-1)", "Location: SHELF 2-C", "Aluminum Spacer (3611-16-1)", "Location: SHELF 3-A"], "tools": ["Alignment Jigs", "Medium/Long T-20 drill Bit", "(HTD)-Blue Switch Heavy Torque Driver (setting at 2-3)", "(OSLD)-Orange Switch Light Torque Driver-(setting at 4)", "T-15 Drill Bit", "Bin labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Torque setting at 2-3 on HTD- T-20 (Screw 3601-6-1)", "Torque Setting at 4 on OSLD T-15 (Screw 3605-5-1)"]}, {"name": "Station 2", "materials": ["Microphone (6101-65-1)", "Location:", "FRONT BAY 1-A", "Microphone Boot (3609-3-1)", "Location: SHELF 3-D", "Screw 8-32x0.5\u201d T-20 Drill Bit (3605\u20139-1)", "Location: SHELF 2-A", "Speaker (3502-11-1)", "Location: LANE 4", "Flat Washer (3610-13-1)", "Location: SHELF 3-C", "Lock Washer (3610-11-1)", "Location: SHELF 3-C"], "tools": ["Speaker Guard", "Tweezers", "Magnetizer", "Screw Presenter", "T-20 Drill Bit", "Blue Switch Heavy Torque Driver"], "torque": ["Torque setting at 1-2-on HTD T-20 (Screw 3605-9-1)"]}, {"name": "Station 3", "materials": ["Testing Computer", "3D Printed Spacer (3614-1-1)", "Location: SHELF 9-B", "Faceplate (4001-19-2)", "Location:", "FRONT BAY 2-A", "8-32x3/4, T-20 Drill Bit, Screw (3605-6-1)", "Location: SHELF 2-B"], "tools": ["Headset", "Tweezers/Jumpers", "(OSLD)-Orange Switch Light Torque Driver-(setting at 3-5)", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)", "T-20 Drill Bit"], "torque": ["Torque Setting at 3-5 on OSLD T-20 (Screw 3605-6-1)"]}, {"name": "Station 4", "materials": ["Plastic Bag 2 mil 2x3 resealable (4303-1-1)", "Location: SHELF 4-B", "Screw (3605-12-1)", "Location: SHELF 3-G", "Screw (3603-28-1)", "Location: SHELF 2-E", "Screw (3605-11-1)", "Location: SHELF 2-A", "Washer (3610-10-1)", "Location: SHELF 3-C", "Washer (3610-11-1)", "Location: SHELF 3-C", "Left Side Plate (4001-26-1)", "Location: LANE 2", "Plastic Bag (17x18 Can liner) (4303-4-1)", "Location: SHELF 9-D", "Foam Caps (4301-17-3)", "Location: BAY 4-A", "SMT Shipping carton (4301-20-1)", "Location: LANE 1", "Mounting Bracket (4701-132-1)", "Location: LANE 2", "Bracket Caps (4101-9-1)", "Location: SHELF 4-C", "Wahsega Tape (4321-6-1)", "Location: SHELF 11-A"], "tools": ["HTD)-Blue Switch Heavy Torque Driver (setting at 2-3)", "T-20 Drill Bit", "Painters Tape", "Isopropyl Alcohol", "Cleaning Wipes", "Tape Gun", "48x40 Pallet", "Pallet Date Code Sheet", "T-20 Drill Bit"], "torque": ["Torque setting at 2-3 on HTD- T-20 (Screw 3605-11-1)"]}], "category": "Speakers", "variants": ["CAR", "INF", "SIP"]}, {"title": "SMT-2R", "model": "WL-SPKR-SMT-2R", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Extrusion (4701-116-1)", "Location: LANE 2", "8-32x3/4, T-20 Drill Bit, Screw (3605-6-1)", "Location:SHELF 2-B", "Right side Plate (4001-27-1)", "Location: LANE 2", "Buddy Board (6005-10-4)", "Location: LANE 4", "Screw 6-32x1/2 T-15 Drill Bit (3605-5-1)", "Location: SHELF 2-C", "Aluminum Spacer (3611-16-1)", "Location: SHELF 3-A"], "tools": ["Alignment Jigs", "Medium/Long T-20 drill Bit", "(HTD)-Blue Switch Heavy Torque Driver (setting at 2-3)", "(OSLD)-Orange Switch Light Torque Driver-(setting at 4)", "T-15 Drill Bit", "Bin labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Torque setting at 2-3 on HTD- T-20 (Screw 3601-6-1)", "Torque Setting at 4 on OSLD T-15 (Screw 3605-5-1)"]}, {"name": "Station 2", "materials": ["Microphone (6101-65-1)", "Location:", "FRONT BAY 1-A", "Microphone Boot (3609-3-1)", "Location: SHELF 3-D", "Screw 8-32x0.5\u201d T-20 Drill Bit (3605\u20139-1)", "Location: SHELF 2-A", "Speaker (3502-11-1)", "Location: LANE 4", "Flat Washer (3610-13-1)", "Location: SHELF 3-C", "Lock Washer (3610-11-1)", "Location: SHELF 3-C"], "tools": ["Speaker Guard", "Tweezers", "Magnetizer", "Screw Presenter", "T-20 Drill Bit", "Blue Switch Heavy Torque Driver"], "torque": ["Torque setting at 1-2-on HTD T-20 (Screw 3605-9-1)"]}, {"name": "Station 3", "materials": ["Testing Computer", "3D Printed Spacer (3614-1-1)", "Location: SHELF 9-B", "Faceplate (4001-19-2)", "Location:", "FRONT BAY 2-A", "8-32x3/4, T-20 Drill Bit, Screw (3605-6-1)", "Location: SHELF 2-B"], "tools": ["Headset", "Tweezers/Jumpers", "(OSLD)-Orange Switch Light Torque Driver-(setting at 3-5)", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)", "T-20 Drill Bit"], "torque": ["Torque Setting at 3-5 on OSLD T-20 (Screw 3605-6-1)"]}, {"name": "Station 4", "materials": ["Plastic Bag 2 mil 2x3 resealable (4303-1-1)", "Location: SHELF 4-B", "Screw (3605-12-1)", "Location: SHELF 3-G", "Screw (3603-28-1)", "Location: SHELF 2-E", "Screw (3605-11-1)", "Location: SHELF 2-A", "Washer (3610-10-1)", "Location: SHELF 3-C", "Washer (3610-11-1)", "Location: SHELF 3-C", "Left Side Plate (4001-26-1)", "Location: LANE 2", "Plastic Bag (17x18 Can liner) (4303-4-1)", "Location: SHELF 9-D", "Foam Caps (4301-17-3)", "Location: BAY 4-A", "SMT Shipping carton (4301-20-1)", "Location: LANE 1", "Mounting Bracket (4701-132-1)", "Location: LANE 2", "Bracket Caps (4101-9-1)", "Location: SHELF 4-C", "Wahsega Tape (4321-6-1)", "Location: SHELF 11-A"], "tools": ["HTD)-Blue Switch Heavy Torque Driver (setting at 2-3)", "T-20 Drill Bit", "Painters Tape", "Isopropyl Alcohol", "Cleaning Wipes", "Tape Gun", "48x40 Pallet", "Pallet Date Code Sheet", "T-20 Drill Bit"], "torque": ["Torque setting at 2-3 on HTD- T-20 (Screw 3605-11-1)"]}], "category": "Speakers", "variants": []}, {"title": "SMT-A", "model": "WL-SPKR-SMT-A", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Extrusion (4701-116-1)", "Location: LANE 2", "8-32x3/4, T-20 Drill Bit, Screw (3605-6-1)", "Location:SHELF 2-B", "Right side Plate (4001-27-1)", "Location: LANE 2", "Rusty Board (6005-15-4)", "Location: LANE 4", "Screw 6-32x1/2 T-15 Drill Bit (3605-5-1)", "Location: SHELF 2-C", "Aluminum Spacer (3611-16-1)", "Location: SHELF 3-A"], "tools": ["Alignment Jigs", "(OSLD)-Orange Switch Light Torque Driver-(setting at 4)", "T-15 Drill Bit", "Medium/Long T-20 drill Bit", "Bin labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Torque Setting at 4 on OSLD T-15 (Screw 3605-5-1)", "(HTD)-Blue Switch Heavy Torque Driver (setting at 2-3)"]}, {"name": "Station 2", "materials": ["Screw 8-32x0.5\u201d T-20 Drill Bit (3605\u20139-1)", "Location: SHELF 2-A", "Speaker (3502-11-1)", "Location: LANE 4", "Flat Washer (3610-13-1)", "Location: SHELF 3-C", "Lock Washer (3610-11-1)", "Location: SHELF 3-C"], "tools": ["Speaker Guard", "Magnetizer", "Screw Presenter", "T-20 Drill Bit", "Blue Switch Heavy Torque Driver"], "torque": ["Torque setting at 1-2-on HTD T-20 (Screw 3605-9-1)"]}, {"name": "Station 3", "materials": ["Testing Computer", "3D Printed Spacer (3614-1-1)", "Location: SHELF 9-B", "Faceplate (4001-19-2)", "Location:", "FRONT BAY 2-A", "8-32x3/4, T-20 Drill Bit, Screw (3605-6-1)", "Location: SHELF 2-B"], "tools": ["Headset", "Tweezers/Jumpers", "(OSLD)-Orange Switch Light Torque Driver-(setting at 3-5)", "Plastic Thermal Print roll. (Label)", "Ribbon Roll (Film)", "T-20 Drill Bit"], "torque": ["Torque Setting at 3-5 on OSLD T-20 (Screw 3605-6-1)"]}, {"name": "Station 4", "materials": ["Plastic Bag 2 mil 2x3 resealable (4303-1-1)", "Location: SHELF 4-B", "Screw (3605-12-1)", "Location: SHELF 3-G", "Screw (3603-28-1)", "Location: SHELF 2-E", "Screw (3605-11-1)", "Location: SHELF 2-A", "Washer (3610-10-1)", "Location: SHELF 3-C", "Washer (3610-11-1)", "Location: SHELF 3-C", "Left Side Plate (4001-26-1)", "Location: LANE 2", "Plastic Bag (17x18 Can liner) (4303-4-1)", "Location: SHELF 9-D", "Foam Caps (4301-17-3)", "Location: BAY 4-A", "SMT Shipping carton (4301-20-1)", "Location: LANE 1", "Mounting Bracket (4701-132-1)", "Location: LANE 2", "Bracket Caps (4101-9-1)", "Location: SHELF 4-C", "Wahsega Tape (4321-6-1)", "Location: SHELF 11-A"], "tools": ["HTD)-Blue Switch Heavy Torque Driver (setting at 2-3)", "T-20 Drill Bit", "Painters Tape", "Isopropyl Alcohol", "Cleaning Wipes", "Tape Gun", "48x40 Pallet", "Pallet Date Code Sheet", "T-20 Drill Bit"], "torque": ["Torque setting at 2-3 on HTD- T-20 (Screw 3605-11-1)"]}], "category": "Speakers", "variants": []}, {"title": "Zone Controller 1-Channel Carina with Relay", "model": "WL-ZN-CTR-1CH-CAR-R", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Screw, Thread Forming 6-32-3/3 T-15 Drill Bit (3605-8-1)", "LOCATION: SHELF 2-A", "Faceplate", ",(4701-109-3)", "LOCATION: SHELF 5-E", "Tape, Foam 0.25\u201d", "(3922-1-1)", "LOCATION: SHELF 9-E", "CCA, Factory Tested & Programmed, Carina", "(6005-4-5)", "LOCATION: LANE 4", "CCA, Factory Assembled, PM Module \u201cBailey\u201d", "(6005-12-2)", "LOCATION: LANE 4", "1-u Extrusion 4.95 in 4.97 max (4701-84-1)", "LOCATION: LANE 2", "Faceplate, 1-u Steve, Bailey, (4701-135-1)", "LOCATION: SHELF 5-D"], "tools": ["Table top Foam", "Medium/Long 3.5 or 6inch T-15 Bit", "Blue Switch Heavy Torque Driver", "Bin labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Torque setting at 2-3 on HTD- T-15 (Screw 3605-8-1)"]}, {"name": "Station 2 Testing", "materials": ["Label, 3x1\u201d Plastic thermal print, ThermalMark Versa2 series (4502-6-1)", "LOCATION: SHELF 11-E", "Label, 4x2\u201d, Plastic Thermal print, ThermalMark Versa2 series (4502-3-001)", "LOCATION: SHELF 11E"], "tools": ["Headset", "Aux/RCA Cable", "Aux 2-Pin Audio Cable", "PoE Cable", "Speaker"], "torque": []}, {"name": "Station 3 Part Kit & Packaging", "materials": ["Bag, Plastic, 2 mil, 2x3\u201d resealable (4303-1-1)", "Location: SHELF 4-B", "Plug screw terminal 2 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series (3102-29-1)", "Location: SHELF 1-F", "Plug screw terminal 6 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series", "(3102-28-1)", "Location: SHELF 1-F", "Plug 8 pin, screw terminal, 3.5mm centred, w/retention, gree, Kefa KF2EDGK-3.5 series (3102-40-1)", "Location: SHELF 1-E", "Ferrite cable clamp. Split, 40Lx20mm,6.6mm diam cable, 300Z@100MHz(Single turn) (2331-1-1)", "Location: SHELF 1-G", "Box, Mailer, plain white, 6x4.75x2 (4301-3-1)", "Location: LANE 1", "Bubble wrap"], "tools": [], "torque": []}], "category": "Zone Controllers", "variants": []}, {"title": "Zone Controller 1-Channel Informa Cast with Relay", "model": "WL-ZN-CTR-1CH-INF-R", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1", "materials": ["Screw, Thread Forming 6-32-3/3 T-15 Drill Bit (3605-8-1)", "Faceplate", ",(4701-109-3", "Tape, Foam 0.25\u201d", "(3922-1-1)", "CCA, Factory Tested & Programmed, Carina", "(6005-4-5)", "CCA, Factory Assembled, PM Module \u201cBailey\u201d", "(6005-12-2)", "1-u Extrusion 4.95 in 4.97 max (4701-81-1)", "Faceplate, 1-u Steve, Bailey, (4701-135-1)"], "tools": ["Table top Foam", "Medium/Long 3.5 or 6inch T-15 Bit", "Blue Switch Heavy Torque Driver", "Bin labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Torque setting at 2-3 on HTD- T-15 (Screw 3605-8-1)"]}, {"name": "Station 2 Testing", "materials": ["Label, 3x1\u201d Plastic thermal print, ThermalMark Versa2 series (4502-6-1)", "Label, 4x2\u201d, Plastic Thermal print, ThermalMark Versa2 series (4502-3-001)"], "tools": ["Headset", "Aux/RCA Cable", "Aux 2-Pin Audio Cable", "PoE Cable", "Speaker"], "torque": []}, {"name": "Station 3 Part Kit & Packaging", "materials": ["Bag, Plastic, 2 mil, 2x3\u201d resealable (4303-1-1)", "Plug screw terminal 2 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series (3102-29-1)", "Plug screw terminal 6 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series", "(3102-28-1)", "Plug 8 pin, screw terminal, 3.5mm centred, w/retention, gree, Kefa KF2EDGK-3.5 series (3102-40-1)", "Ferrite cable clamp. Split, 40Lx20mm,6.6mm diam cable, 300Z@100MHz(Single turn) (2331-1-1)", "Box, Mailer, plain white, 6x4.75x2 (4301-3-1)", "Bubble wrap"], "tools": [], "torque": []}], "category": "Zone Controllers", "variants": []}, {"title": "Zone Controller 1-Channel with Relay", "model": "WL-ZN-CTR-1CH-R", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Station 1 Parts", "materials": ["Screw, Thread Forming 6-32-3/3 T-15 Drill Bit (3605-8-1)", "LOCATION: SHELF 2-A", "Faceplate", ",(4701-109-3)", "LOCATION: SHELF 5-E", "Tape, Foam 0.25\u201d", "(3922-1-1)", "LOCATION: SHELF 9-E", "CCA, Factory Tested & Programmed, Carina", "(6005-4-5)", "LOCATION: LANE 4", "CCA, Factory Assembled, PM Module \u201cBailey\u201d", "(6005-12-2)", "LOCATION: LANE 4", "1-u Extrusion 4.95 in 4.97 max (4701-81-1)", "LOCATION: LANE 2", "Faceplate, 1-u Steve, Bailey, (4701-135-1)", "LOCATION: SHELF 5-D"], "tools": ["Table top Foam", "Medium/Long 3.5 or 6inch T-15 Bit", "Blue Switch Heavy Torque Driver", "Bin labeled with the correct part number. (Part number and bin number should match)"], "torque": ["Torque setting at 2-3 on HTD- T-15 (Screw 3605-8-1)"]}, {"name": "Station 2 Testing", "materials": ["Label, 3x1\u201d Plastic thermal print, ThermalMark Versa2 series (4502-6-1)", "LOCATION: SHELF 11-E", "Label, 4x2\u201d, Plastic Thermal print, ThermalMark Versa2 series (4502-3-001)", "LOCATION: SHELF 11E"], "tools": ["Headset", "Aux/RCA Cable", "Aux 2-Pin Audio Cable", "PoE Cable", "Speaker"], "torque": []}, {"name": "Station 3 Part Kit & Packaging", "materials": ["Bag, Plastic, 2 mil, 2x3\u201d resealable (4303-1-1)", "Location: SHELF 4-B", "Plug screw terminal 2 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series (3102-29-1)", "Location: SHELF 1-F", "Plug screw terminal 6 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series", "(3102-28-1)", "Location: SHELF 1-F", "Plug 8 pin, screw terminal, 3.5mm centred, w/retention, gree, Kefa KF2EDGK-3.5 series (3102-40-1)", "Location: SHELF 1-E", "Ferrite cable clamp. Split, 40Lx20mm,6.6mm diam cable, 300Z@100MHz(Single turn) (2331-1-1)", "Location: SHELF 1-G", "Box, Mailer, plain white, 6x4.75x2 (4301-3-1)", "Location: LANE 1", "Bubble wrap"], "tools": [], "torque": []}], "category": "Zone Controllers", "variants": []}, {"title": "Zone Controller 2-Channel", "model": "WL-ZN-CTR-2CH", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Parts", "materials": ["Screw, Thread Forming 6-32-3/3 T-15 Drill Bit (3605-8-1)", "LOCATION: SHELF 2-A", "Faceplate", ",(4701-109-3)", "LOCATION: SHELF 5-E", "Tape, Foam 0.25\u201d", "(3922-1-1)", "LOCATION: SHELF 9-E", "CCA, Factory Tested & Programmed, Carina", "(6005-4-5)", "LOCATION: LANE 4", "CCA, Factory Assembled, PM Module \u201cJack Jack\u201d", "(6005-7-4)", "LOCATION: LANE 4", "1-u Extrusion 4.95 in 4.97 max (4701-84-1)", "LOCATION: LANE 2", "Faceplate, 1-u Steve, Bailey, (4701-152-1)", "LOCATION: SHELF 5-D"], "tools": ["Table top Foam", "Medium/Long 3.5 or 6inch T-15 Bit", "Blue Switch Heavy Torque Driver", "Bin labeled with the correct part number. (Part number and bin number should match)", "Tweezers"], "torque": ["Torque setting at 2-3 on HTD- T-15 (Screw 3605-8-1)"]}, {"name": "Testing", "materials": ["Label, 3x1\u201d Plastic thermal print, ThermalMark Versa2 series (4502-6-1)", "LOCATION: SHELF 11-E", "Label, 4x2\u201d, Plastic Thermal print, ThermalMark Versa2 series (4502-3-001)", "LOCATION: SHELF 11E"], "tools": ["Headset", "Aux/RCA Cable", "Aux 2-Pin Audio Cable", "PoE Cable", "Speaker"], "torque": []}, {"name": "Part Kit & Packaging", "materials": ["Bag, Plastic, 2 mil, 2x3\u201d resealable (4303-1-1)", "Location: SHELF 4-B", "Plug screw terminal 2 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series (3102-29-1)", "Location: SHELF 1-F", "Plug screw terminal 6 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series", "(3102-28-1)", "Location: SHELF 1-F", "Ferrite cable clamp. Split, 40Lx20mm,6.6mm diam cable, 300Z@100MHz(Single turn) (2331-1-1)", "Location: SHELF 1-G", "Box, Mailer, plain white, 6x4.75x2 (4301-3-1)", "Location: LANE 1", "Bubble wrap"], "tools": [], "torque": []}], "category": "Zone Controllers", "variants": []}, {"title": "Zone Controller 2-Channel Informa Cast", "model": "WL-ZN-CTR-2CH-INF", "teamLabel": "Assembly Team", "teamOptions": ["T1", "T2", "T3", "T4"], "stations": [{"name": "Parts", "materials": ["Screw, Thread Forming 6-32-3/3 T-15 Drill Bit (3605-8-1)", "LOCATION: SHELF 2-A", "Faceplate", ",(4701-109-3)", "LOCATION: SHELF 5-E", "Tape, Foam 0.25\u201d", "(3922-1-1)", "LOCATION: SHELF 9-E", "CCA, Factory Tested & Programmed, Carina", "(6005-4-5)", "LOCATION: LANE 4", "CCA, Factory Assembled, PM Module \u201cJack Jack\u201d", "(6005-7-4)", "LOCATION: LANE 4", "1-u Extrusion 4.95 in 4.97 max (4701-84-1)", "LOCATION: LANE 2", "Faceplate, 1-u Steve, Bailey, (4701-152-1)", "LOCATION: SHELF 5-D"], "tools": ["Table top Foam", "Medium/Long 3.5 or 6inch T-15 Bit", "Blue Switch Heavy Torque Driver", "Bin labeled with the correct part number. (Part number and bin number should match)", "Tweezers"], "torque": ["Torque setting at 2-3 on HTD- T-15 (Screw 3605-8-1)"]}, {"name": "Testing", "materials": ["Label, 3x1\u201d Plastic thermal print, ThermalMark Versa2 series (4502-6-1)", "LOCATION: SHELF 11-E", "Label, 4x2\u201d, Plastic Thermal print, ThermalMark Versa2 series (4502-3-001)", "LOCATION: SHELF 11E"], "tools": ["Headset", "Aux/RCA Cable", "Aux 2-Pin Audio Cable", "PoE Cable", "Speaker"], "torque": []}, {"name": "Part Kit & Packaging", "materials": ["Bag, Plastic, 2 mil, 2x3\u201d resealable (4303-1-1)", "Location: SHELF 4-B", "Plug screw terminal 2 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series (3102-29-1)", "Location: SHELF 1-F", "Plug screw terminal 6 pins, 3.5mm centered, Hoz wire entry, no retention Kafa KF2EDGK-.3.5 series", "(3102-28-1)", "Location: SHELF 1-F", "Ferrite cable clamp. Split, 40Lx20mm,6.6mm diam cable, 300Z@100MHz(Single turn) (2331-1-1)", "Location: SHELF 1-G", "Box, Mailer, plain white, 6x4.75x2 (4301-3-1)", "Location: LANE 1", "Bubble wrap"], "tools": [], "torque": []}], "category": "Zone Controllers", "variants": []}];
+
+const $ = (s, el=document) => el.querySelector(s);
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+// decorate an item string: part numbers (xxxx-xx-x) -> chip, "Location: X" -> tag
+function decorate(text){
+  let t = esc(text);
+  t = t.replace(/\(?\b(\d{3,4}-\d{1,3}-\d{1,2})\b\)?/g, '<span class="pn">$1</span>');
+  t = t.replace(/,?\s*Location\s*:\s*([^<]+)$/i, ' <span class="loc">📍 $1</span>');
+  return t;
+}
+
+let current = 0;
+let state = null;          // {fields:{}, team:null, variant:null, checks:{}, initials:{}}
+let saveTimer = null;
+let storageOK = true;
+
+function blankState(rec){
+  return {fields:{}, team:null, variant:null,
+          checks:{}, initials:{}};
+}
+
+function keyFor(i){ return 'preflight:' + i; }
+
+async function loadState(i){
+  try{
+    const r = await window.storage.get(keyFor(i));
+    if(r && r.value) return JSON.parse(r.value);
+  }catch(e){ /* no saved record yet */ }
+  return blankState(DATA[i]);
+}
+
+function scheduleSave(){
+  $('#saveNote').textContent = '…';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    if(!storageOK){ $('#saveNote').textContent=''; return; }
+    try{
+      await window.storage.set(keyFor(current), JSON.stringify(state));
+      $('#saveNote').textContent = 'Saved';
+      setTimeout(()=>{ if($('#saveNote').textContent==='Saved') $('#saveNote').textContent=''; }, 1800);
+    }catch(e){
+      storageOK = false;
+      $('#saveNote').textContent = '';
+    }
+  }, 600);
+}
+
+function totalItems(rec){
+  return rec.stations.reduce((n,s)=> n + s.materials.length + s.tools.length + s.torque.length, 0);
+}
+function checkedItems(){
+  return Object.values(state.checks).filter(Boolean).length;
+}
+
+function stationCounts(rec, si){
+  const s = rec.stations[si];
+  const tot = s.materials.length + s.tools.length + s.torque.length;
+  let done = 0;
+  ['m','t','q'].forEach(kind=>{
+    const arr = kind==='m'?s.materials:kind==='t'?s.tools:s.torque;
+    arr.forEach((_,ii)=>{ if(state.checks[`${si}.${kind}.${ii}`]) done++; });
+  });
+  return {done, tot};
+}
+
+function refreshProgress(){
+  const rec = DATA[current];
+  const tot = totalItems(rec), done = checkedItems();
+  const pct = tot ? Math.round(done/tot*100) : 0;
+  $('#progFill').style.width = pct + '%';
+  $('#progText').textContent = `${done} of ${tot} items checked — ${rec.title}`;
+  $('#progPct').textContent = pct + '%';
+  // spine + station states
+  rec.stations.forEach((s,si)=>{
+    const {done,tot} = stationCounts(rec,si);
+    const hasInit = (state.initials[si]||'').trim().length>0;
+    const complete = tot>0 && done===tot && hasInit;
+    const li = $('#sp-'+si), card = $('#st-'+si);
+    if(li){ li.classList.toggle('done', complete); li.classList.toggle('partial', !complete && done>0);
+            $('.ring',li).textContent = complete ? '✓' : '';
+            $('.lbl span',li).textContent = `${done}/${tot}`; }
+    if(card){ card.classList.toggle('complete', complete);
+              $('.st-count',card).textContent = `${done}/${tot} checked`;
+              $('.st-status',card).textContent = complete ? '' : (hasInit? 'items remaining' : 'initials required'); }
+  });
+}
+
+function checkList(items, si, kind, extraClass=''){
+  return items.map((it,ii)=>{
+    const id = `${si}.${kind}.${ii}`;
+    const on = !!state.checks[id];
+    const body = kind==='q'
+      ? `<span class="torque-tag">SPEC</span><span class="txt">${decorate(it)}</span>`
+      : `<span class="txt">${decorate(it)}</span>`;
+    return `<label class="check ${extraClass} ${on?'checked':''}">
+      <input type="checkbox" data-id="${id}" ${on?'checked':''}>
+      <span>${body}</span></label>`;
+  }).join('');
+}
+
+function fieldHTML(id, label, type='text'){
+  const v = esc(state.fields[id]||'');
+  return `<div class="field"><label for="f-${id}">${label}</label>
+    <input id="f-${id}" data-f="${id}" type="${type}" value="${v}"></div>`;
+}
+
+function render(){
+  const rec = DATA[current];
+  // spine
+  $('#spineList').innerHTML = rec.stations.map((s,si)=>`
+    <li id="sp-${si}"><button type="button" data-goto="st-${si}">
+      <span class="ring"></span>
+      <span class="lbl"><b>${esc(s.name)}</b><span></span></span>
+    </button></li>`).join('');
+
+  const variantChips = rec.variants.length ? `
+    <div class="chipset" role="group" aria-label="Model variant — tap to circle">
+      <span class="cap">Circle one:</span>
+      ${rec.variants.map(v=>`<button type="button" class="chip ${state.variant===v?'on':''}" data-variant="${v}">${v}</button>`).join('')}
+    </div>` : '';
+
+  const teamChips = rec.teamOptions.length ? `
+    <div class="chipset" role="group" aria-label="${esc(rec.teamLabel)}">
+      <span class="cap">${esc(rec.teamLabel)}:</span>
+      ${rec.teamOptions.map(t=>`<button type="button" class="chip ${state.team===t?'on':''}" data-team="${t}">${t}</button>`).join('')}
+    </div>` : '';
+
+  $('#main').innerHTML = `
+  <section class="card">
+    <div class="traveler-head">
+      <div class="doc-kicker">${esc(rec.category)} · Preflight Checklist</div>
+      <h1>${esc(rec.title)}</h1>
+      <div class="modelrow">
+        <span class="model">${esc(rec.model)}</span>
+        ${variantChips}
+      </div>
+    </div>
+    <div class="fields">
+      ${fieldHTML('startBy','Start by')}
+      ${fieldHTML('startDate','Date','date')}
+      ${fieldHTML('startTime','Start time','time')}
+      ${fieldHTML('endTime','End time','time')}
+      ${fieldHTML('asmDate','Assembly start date','date')}
+    </div>
+    <div class="fields" style="padding-top:0">
+      <div class="field" style="align-self:end">${teamChips}</div>
+      ${fieldHTML('completedBy','Completed by')}
+      ${fieldHTML('compDate','Completion date','date')}
+      ${fieldHTML('line','Line')}
+    </div>
+    <div class="instr">Check every material, tool, and torque spec at your station before starting the run. Tap the bold variant to “circle” it, and initial each station you work.</div>
+  </section>
+
+  ${rec.stations.map((s,si)=>`
+  <section class="card station" id="st-${si}">
+    <div class="station-head">
+      <span class="st-num">${esc(s.name).toUpperCase()}</span>
+      <h3>${s.torque.length? 'Materials · Tools · Torque':'Materials · Tools'}</h3>
+      <span class="st-count"></span>
+    </div>
+    <div class="st-cols">
+      <div class="st-col">
+        <h4>Materials</h4>
+        ${checkList(s.materials, si, 'm') || '<em style="color:var(--ink-soft);font-size:13px">None listed</em>'}
+      </div>
+      <div class="st-col">
+        <h4>Tools</h4>
+        ${checkList(s.tools, si, 't') || '<em style="color:var(--ink-soft);font-size:13px">None listed</em>'}
+        ${s.torque.length? `<h4 style="margin-top:16px">Torque spec</h4>${checkList(s.torque, si, 'q','torque-item')}`:''}
+      </div>
+    </div>
+    <div class="st-foot">
+      <div class="initials">
+        <label for="ini-${si}">Initials</label>
+        <input id="ini-${si}" data-ini="${si}" maxlength="5" value="${esc(state.initials[si]||'')}" autocomplete="off">
+      </div>
+      <span class="stamp">STATION CLEAR</span>
+      <span class="st-status"></span>
+    </div>
+  </section>`).join('')}
+
+  <section class="card">
+    <div class="station-head">
+      <span class="st-num" style="border-color:var(--steel);color:var(--steel)">QA</span>
+      <h3>Article Inspections</h3>
+    </div>
+    <div class="st-cols">
+      <div class="st-col">
+        <h4>First Article Inspection</h4>
+        <div class="fields" style="padding:4px 0 8px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+          ${fieldHTML('faiBy','Inspected by')}
+          ${fieldHTML('faiDate','Date','date')}
+          ${fieldHTML('faiTime','Time','time')}
+        </div>
+        <div class="chipset" role="group" aria-label="First article result">
+          <span class="cap">Result:</span>
+          <button type="button" class="chip pf-pass ${state.fields.faiResult==='Pass'?'on-pass':''}" data-pf="fai" data-val="Pass">PASS</button>
+          <button type="button" class="chip pf-fail ${state.fields.faiResult==='Fail'?'on-fail':''}" data-pf="fai" data-val="Fail">FAIL</button>
+        </div>
+      </div>
+      <div class="st-col">
+        <h4>Last Article Inspection</h4>
+        <div class="fields" style="padding:4px 0 8px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+          ${fieldHTML('laiBy','Inspected by')}
+          ${fieldHTML('laiDate','Date','date')}
+          ${fieldHTML('laiTime','Time','time')}
+        </div>
+        <div class="chipset" role="group" aria-label="Last article result">
+          <span class="cap">Result:</span>
+          <button type="button" class="chip pf-pass ${state.fields.laiResult==='Pass'?'on-pass':''}" data-pf="lai" data-val="Pass">PASS</button>
+          <button type="button" class="chip pf-fail ${state.fields.laiResult==='Fail'?'on-fail':''}" data-pf="lai" data-val="Fail">FAIL</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card signoff">
+    <h3>Before you sign off</h3>
+    <p>All stations must show <b>STATION CLEAR</b> — every item checked and initialed — and the header must be complete. Then send the record to the Google Form, or print it for the traveler packet.</p>
+    <div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-dark" type="button" data-gform-send>Send to Google Form</button>
+      <button class="btn btn-amber" type="button" onclick="window.print()">Print completed record</button>
+    </div>
+  </section>`;
+
+  refreshProgress();
+}
+
+/* -------- events (delegated) -------- */
+document.addEventListener('change', e=>{
+  const cb = e.target.closest('input[type=checkbox][data-id]');
+  if(cb){
+    state.checks[cb.dataset.id] = cb.checked;
+    cb.closest('.check').classList.toggle('checked', cb.checked);
+    refreshProgress(); scheduleSave(); return;
+  }
+});
+document.addEventListener('input', e=>{
+  const f = e.target.closest('input[data-f]');
+  if(f){ state.fields[f.dataset.f] = f.value; scheduleSave(); return; }
+  const ini = e.target.closest('input[data-ini]');
+  if(ini){ ini.value = ini.value.toUpperCase(); state.initials[ini.dataset.ini] = ini.value; refreshProgress(); scheduleSave(); return; }
+});
+document.addEventListener('click', e=>{
+  const pf = e.target.closest('[data-pf]');
+  if(pf){
+    const key = pf.dataset.pf + 'Result';
+    state.fields[key] = state.fields[key] === pf.dataset.val ? '' : pf.dataset.val;
+    document.querySelectorAll(`[data-pf="${pf.dataset.pf}"]`).forEach(c=>{
+      c.classList.toggle('on-pass', c.dataset.val==='Pass' && state.fields[key]==='Pass');
+      c.classList.toggle('on-fail', c.dataset.val==='Fail' && state.fields[key]==='Fail');
+    });
+    scheduleSave(); return;
+  }
+  const v = e.target.closest('[data-variant]');
+  if(v){ state.variant = state.variant===v.dataset.variant ? null : v.dataset.variant;
+         document.querySelectorAll('[data-variant]').forEach(c=>c.classList.toggle('on', c.dataset.variant===state.variant));
+         scheduleSave(); return; }
+  const t = e.target.closest('[data-team]');
+  if(t){ state.team = state.team===t.dataset.team ? null : t.dataset.team;
+         document.querySelectorAll('[data-team]').forEach(c=>c.classList.toggle('on', c.dataset.team===state.team));
+         scheduleSave(); return; }
+  const g = e.target.closest('[data-goto]');
+  if(g){ const el = document.getElementById(g.dataset.goto); if(el) el.scrollIntoView({block:'start'}); return; }
+});
+
+$('#printBtn').addEventListener('click', ()=>window.print());
+
+/* -------- Google Form integration -------- */
+const GFORM_KEY = 'preflight:gform-config';
+const GFORM_FIELDS = ['PRODUCT','MODEL','VARIANT','TEAM','STARTBY','STARTDATE','STARTTIME','ENDTIME','ASMDATE','COMPLETEDBY','COMPDATE','LINE','INITIALS','FAI','LAI','PROGRESS','RECORD'];
+let gformCfg = null; // {base:'https://…/viewform', map:{PRODUCT:'entry.123',…}}
+
+async function loadGformCfg(){
+  try{
+    const r = await window.storage.get(GFORM_KEY, true); // shared: one setup serves the whole team
+    if(r && r.value) gformCfg = JSON.parse(r.value);
+  }catch(e){ /* not configured yet */ }
+}
+
+function parsePrefilledUrl(raw){
+  const url = raw.trim();
+  const m = url.match(/^(https:\/\/docs\.google\.com\/forms\/[^?\s]*?viewform)/);
+  if(!m) return {err:'That doesn\u2019t look like a Google Forms pre-filled link. It should start with https://docs.google.com/forms/… and end in /viewform?usp=pp_url&entry…'};
+  const base = m[1];
+  const map = {};
+  const q = url.split('?')[1] || '';
+  for(const pair of q.split('&')){
+    const [k, v=''] = pair.split('=');
+    if(!/^entry\.\d+$/.test(k)) continue;
+    const code = decodeURIComponent(v.replace(/\+/g,' ')).trim().toUpperCase();
+    if(GFORM_FIELDS.includes(code)) map[code] = k;
+  }
+  if(Object.keys(map).length === 0) return {err:'No field codes found in the link. In the pre-filled view, type the codes (PRODUCT, MODEL, …) into the answer boxes before clicking "Get link."'};
+  return {base, map};
+}
+
+function buildRecordText(rec){
+  const lines = [];
+  rec.stations.forEach((s,si)=>{
+    const {done,tot} = stationCounts(rec,si);
+    const ini = (state.initials[si]||'').trim() || '—';
+    lines.push(`${s.name}: ${done}/${tot} checked — initials: ${ini}`);
+    // list anything left unchecked so the record flags gaps
+    const missing = [];
+    [['m',s.materials],['t',s.tools],['q',s.torque]].forEach(([kind,arr])=>{
+      arr.forEach((it,ii)=>{ if(!state.checks[`${si}.${kind}.${ii}`]) missing.push(it); });
+    });
+    if(missing.length) lines.push('  MISSING: ' + missing.join(' | '));
+  });
+  return lines.join('\n');
+}
+
+function gformValues(){
+  const rec = DATA[current];
+  const tot = totalItems(rec), done = checkedItems();
+  const f = state.fields;
+  const inis = rec.stations.map((s,si)=>`${s.name.replace(/^Station\s*/i,'S')}:${(state.initials[si]||'—').trim()||'—'}`).join('  ');
+  return {
+    PRODUCT: rec.title,
+    MODEL: rec.model,
+    VARIANT: state.variant || '',
+    TEAM: state.team ? `${rec.teamLabel} ${state.team}` : '',
+    STARTBY: f.startBy||'', STARTDATE: f.startDate||'', STARTTIME: f.startTime||'',
+    ENDTIME: f.endTime||'',
+    ASMDATE: f.asmDate||'', COMPLETEDBY: f.completedBy||'', COMPDATE: f.compDate||'',
+    LINE: f.line||'', INITIALS: inis,
+    FAI: [f.faiResult, f.faiBy && 'by '+f.faiBy, f.faiDate, f.faiTime].filter(Boolean).join(' — '),
+    LAI: [f.laiResult, f.laiBy && 'by '+f.laiBy, f.laiDate, f.laiTime].filter(Boolean).join(' — '),
+    PROGRESS: `${done}/${tot} (${tot?Math.round(done/tot*100):0}%)`,
+    RECORD: buildRecordText(rec)
+  };
+}
+
+function openGformModal(){
+  $('#gformStatus').textContent = '';
+  $('#gformStatus').className = 'gform-status';
+  $('#gformUrl').value = gformCfg ? `Connected — ${Object.keys(gformCfg.map).length} fields mapped. Paste a new link to replace.` : '';
+  if(gformCfg) $('#gformUrl').select?.();
+  $('#gformModal').classList.add('open');
+}
+
+function sendToGform(){
+  if(!gformCfg){ openGformModal(); return; }
+  const vals = gformValues();
+  const params = [];
+  for(const [code, entry] of Object.entries(gformCfg.map)){
+    const v = vals[code];
+    if(v) params.push(entry + '=' + encodeURIComponent(v));
+  }
+  const url = gformCfg.base + '?usp=pp_url&' + params.join('&');
+  // Opens the form pre-filled; the operator reviews and presses Submit there.
+  window.open(url, '_blank', 'noopener');
+}
+
+$('#gformSendBtn').addEventListener('click', sendToGform);
+$('#gformSetupBtn').addEventListener('click', openGformModal);
+document.addEventListener('click', e=>{
+  if(e.target.closest('[data-gform-send]')) sendToGform();
+  if(e.target.closest('[data-close]') || e.target === $('#gformModal')) $('#gformModal').classList.remove('open');
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') $('#gformModal').classList.remove('open'); });
+
+$('#gformSave').addEventListener('click', async ()=>{
+  const status = $('#gformStatus');
+  const res = parsePrefilledUrl($('#gformUrl').value);
+  if(res.err){ status.textContent = res.err; status.className = 'gform-status err'; return; }
+  gformCfg = res;
+  try{ await window.storage.set(GFORM_KEY, JSON.stringify(gformCfg), true); }catch(e){}
+  status.textContent = `Connected — ${Object.keys(res.map).length} of ${GFORM_FIELDS.length} fields mapped.`;
+  status.className = 'gform-status ok';
+  setTimeout(()=> $('#gformModal').classList.remove('open'), 1200);
+});
+
+$('#gformClear').addEventListener('click', async ()=>{
+  gformCfg = null;
+  $('#gformUrl').value = '';
+  try{ await window.storage.delete(GFORM_KEY, true); }catch(e){}
+  $('#gformStatus').textContent = 'Connection removed.';
+  $('#gformStatus').className = 'gform-status';
+});
+
+$('#resetBtn').addEventListener('click', async ()=>{
+  if(!confirm('Clear all checks, fields, and initials for this checklist?')) return;
+  state = blankState(DATA[current]);
+  try{ await window.storage.delete(keyFor(current)); }catch(e){}
+  render();
+});
+
+$('#productSel').addEventListener('change', async e=>{
+  current = +e.target.value;
+  state = await loadState(current);
+  render();
+  window.scrollTo({top:0});
+});
+
+/* -------- boot -------- */
+(function buildPicker(){
+  const cats = {};
+  DATA.forEach((r,i)=>{ (cats[r.category] = cats[r.category]||[]).push(i); });
+  $('#productSel').innerHTML = Object.keys(cats).sort().map(c=>
+    `<optgroup label="${esc(c)}">` +
+    cats[c].map(i=>`<option value="${i}">${esc(DATA[i].title)}</option>`).join('') +
+    `</optgroup>`).join('');
+})();
+
+(async ()=>{
+  // detect storage once
+  try{ await window.storage.list('preflight:'); }catch(e){ if(!window.storage) storageOK=false; }
+  await loadGformCfg();
+  current = +$('#productSel').value || 0;
+  state = await loadState(current);
+  render();
+})();
+</script>
+</body>
+</html>
